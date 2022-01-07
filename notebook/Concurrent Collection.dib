@@ -1,0 +1,222 @@
+#!markdown
+
+### This buggy code show why we can't use standard collection on multi threaded work. Not thread safe.
+
+#!csharp
+
+static void PlaceOrders(Queue<string> orders, string customerName, int orderCount)
+{
+    for(int i = 1; i <= orderCount; ++i)
+    {
+        System.Threading.Thread.Sleep(1); // block thread to simulate a long operation
+        // Task.Delay(1) doesn't block
+        string orderName = $"{customerName} wants t-shirt {i}";
+        orders.Enqueue(orderName); 
+    }
+}
+
+// buggy code
+var ordersQueue = new Queue<string>();
+var task1 = Task.Run(() => PlaceOrders(ordersQueue, "Daniel", 5));
+var task2 = Task.Run(() => PlaceOrders(ordersQueue, "Susan", 5));
+
+Task.WaitAll(task1, task2);
+foreach(var order in ordersQueue)
+{
+    Console.WriteLine($"Order: {order}");
+}
+
+#!markdown
+
+### Safer Code. Replace Queue with ConcurrentQueue
+
+The order may be unpredictable if the sleep time is even smaller such as TimeSpan(1).
+But in this example, we don't care about order.
+
+#!csharp
+
+// same code but replace ConcurrentQueue with Queue
+using System.Collections.Concurrent;
+
+static void PlaceOrders(ConcurrentQueue<string> orders, string customerName, int orderCount)
+{
+    for(int i = 1; i <= orderCount; ++i)
+    {
+        System.Threading.Thread.Sleep(1); // block thread to simulate a long operation
+        // Task.Delay(1) doesn't block
+        string orderName = $"{customerName} wants t-shirt {i}";
+        orders.Enqueue(orderName); 
+    }
+}
+
+// buggy code
+var ordersQueue = new ConcurrentQueue<string>();
+var task1 = Task.Run(() => PlaceOrders(ordersQueue, "Daniel", 5));
+var task2 = Task.Run(() => PlaceOrders(ordersQueue, "Susan", 5));
+
+Task.WaitAll(task1, task2);
+foreach(var order in ordersQueue)
+{
+    Console.WriteLine($"Order: {order}");
+}
+
+#!markdown
+
+### Concurrent Dictionary
+
+Concurrent Dictionary is my all time favorite.
+
+#!csharp
+
+using System.Collections.Immutable;
+using System.Threading;
+
+public enum SelectResult { Success, NoStockLeft, ChosenShirtSold }
+
+public class TShirt
+{
+    public string Code {get;}
+    public string Name {get;}
+    public int PricePence {get;}
+
+    public TShirt(string code, string name, int pricePence)
+    {
+        Code = code;
+        Name = name;
+        PricePence = pricePence;
+    }
+
+    public override string ToString() => $"{Name} ({DisplayPrice(PricePence)})";
+
+    private string DisplayPrice(int pricePence) => $"${pricePence/100}.{pricePence%100:00}";  // 2nd $ is dollar
+}
+
+public static class TShirtProvider
+{
+    // can't modify and also thread safe
+    public static ImmutableArray<TShirt> allShirts {get;} = ImmutableArray.Create(
+        new TShirt("docker", "Docker", 200),
+        new TShirt("bigData", "Big Data", 100),
+        new TShirt("lc", "Leetcode", 300),
+        new TShirt("kcdc", "KcDc", 450),
+        new TShirt("ms", "Microsoft", 220),
+        new TShirt("ebay", "Ebay", 350),
+        new TShirt("so", "Stack Overflow", 500)
+    );
+}
+
+// Randome class helper
+public class Rnd
+{
+    private static Random _generator = new Random();
+    public static int NextInt(int max) => _generator.Next(max);
+
+    // Neat function getting a probability and return its chances. Between 0.0 and 1
+    public static bool TrueWithProb(double probOfTrue) => _generator.NextDouble() < probOfTrue;
+}
+
+public class StockController
+{
+    private ConcurrentDictionary<string, TShirt> _stock;
+
+    public StockController(IEnumerable<TShirt> shirts)
+    {
+        _stock = new ConcurrentDictionary<string, TShirt>(shirts.ToDictionary(x => x.Code)); //Code is key of dictionary
+    }
+
+    public bool Sell(string code)
+    {
+        // try remove won't fail but will need to know 
+        // if remove (sell) was succeeded.
+        return _stock.TryRemove(code, out TShirt shirtRemoved);
+    }
+
+    public (SelectResult Result, TShirt Shirt) SelectRandomShirt()
+    {
+        var keys = _stock.Keys.ToList();
+        if(keys.Count == 0) return (SelectResult.NoStockLeft, null); // all shirts sold
+        
+        Thread.Sleep(Rnd.NextInt(10));
+        string selectedCode = keys[Rnd.NextInt(keys.Count)];
+        //return _stock[selectedCode]; buggy code here because tshirt could have been sold
+        bool found = _stock.TryGetValue(selectedCode, out TShirt shirt);
+        if(found == true)
+        {
+            return (SelectResult.Success, shirt);
+        }
+        
+        return (SelectResult.ChosenShirtSold, null);
+    }
+
+    public void DisplayStock()
+    {
+        Console.WriteLine($"\r\n{_stock.Count} items left in stock:");
+        foreach(var shirt in _stock.Values)
+        {
+            Console.WriteLine(shirt);
+        }
+    }
+}
+
+public class SalesPerson
+{
+    public string Name {get;}
+    public SalesPerson(string name)
+    {
+        Name = name;
+    }
+
+    public void Work(TimeSpan workDay, StockController controller)
+    {
+        DateTime start = DateTime.UtcNow;
+        while(DateTime.UtcNow - start < workDay)
+        {
+            var result = ServeCustomer(controller);
+            if(result.Status != null)
+                Console.WriteLine($"{Name}: {result.Status} Tshirt");
+
+            if(result.ShirtsInStock == false)
+                break;
+        }
+    }
+
+    public (bool ShirtsInStock, string Status) ServeCustomer (StockController controller)
+    {
+        var result = controller.SelectRandomShirt();
+        var shirt = result.Shirt;
+        if(result.Result == SelectResult.NoStockLeft)
+            return (false, "All shirts sold");
+        else if(result.Result == SelectResult.ChosenShirtSold)
+            return (true, "Can't show shirt to customer - already sold");
+
+        Thread.Sleep(Rnd.NextInt(30)); // Simulate some thinking
+
+        // customer chooses to buy with only 20% probability
+        if(Rnd.TrueWithProb(0.2) == true)
+        {
+            var sold = controller.Sell(shirt.Code);
+            if(sold)
+                return (true, $"Sold {shirt.Name}");
+            return (true, $"Can't sell {shirt.Name}: Already Sold");
+        }
+        return (true, null);
+    }
+}
+
+var controller = new StockController(TShirtProvider.allShirts);
+var workDay = new TimeSpan(0, 0, 0, 0, 500);
+
+var task1 = Task.Run(() => new SalesPerson("David").Work(workDay, controller));
+var task2 = Task.Run(() => new SalesPerson("Kim").Work(workDay, controller));
+var task3 = Task.Run(() => new SalesPerson("Mai").Work(workDay, controller));
+
+Task.WaitAll(task1, task2, task3);
+
+controller.DisplayStock();
+
+#!markdown
+
+### Using Concurrent Collections
+
+1) Avoid Methods that rely on knowing the state. Instead, favor TryMethods which don't presume the state.
+2) Code should allow for failure.

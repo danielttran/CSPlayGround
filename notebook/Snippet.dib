@@ -1,0 +1,51 @@
+#!csharp
+
+// Some print functions to show result
+
+public void Print(int[] arr)
+{
+    for(int i = 0; i < arr?.Length; ++i)
+    {
+        Console.Write($"{arr[i]}, ");
+    }
+}
+
+public void Print<K, V>(Dictionary<K, V> dict)
+{
+    foreach(KeyValuePair<K, V> entry in dict)
+    {
+        Console.Write($"{entry.Key}:{entry.Value}, ");
+    }
+}
+
+public void Print<T>(IEnumerable list)
+{
+    foreach(T entry in list)
+    {
+        Console.Write($"{entry?.ToString()}, ");
+    }
+}
+
+public void Print<T>(T obj)
+{
+    Console.Write(obj?.ToString());
+}
+
+#!markdown
+
+### This is some useful functions
+
+#!csharp
+
+// This is to check if the caller is Admin
+public static bool IsSystemAccount()
+{
+	bool isSystem;
+	using (var identity = System.Security.Principal.WindowsIdentity.GetCurrent())
+	{
+		isSystem = identity.IsSystem;
+	}
+	return isSystem;
+}
+
+Print(IsSystemAccount());
