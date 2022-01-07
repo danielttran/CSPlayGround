@@ -422,3 +422,876 @@ var task4 = Task.Run(() => new SalesPerson("Bill").Work(workDay, controller));
 Task.WaitAll(task1, task2, task3, task4);
 
 controller.DisplayStock();
+
+#!markdown
+
+### Queues, Stacks, and Bags
+
+#### Commission Calculation Sample
+
+#!csharp
+
+using System.Collections.Immutable;
+using System.Threading;
+using System.Collections.Concurrent;
+
+public class StockController
+{
+    private ConcurrentDictionary<string, int> _stock = new ConcurrentDictionary<string, int>();
+    int _totalQuantityBought;
+    int _totalQuantitySold;
+
+    public void BuyShirts(string code, int quantityToBuy)
+    {   
+        // race condition (bug)
+        // if(!_stock.ContainsKey(code))
+        //  _stock.TryAdd(code, 0);
+        //_stock[code] += quantityToBuy;
+        //_totalQuantityBought += quantityToBuy;
+        
+        // solution
+        _stock.AddOrUpdate(code, 
+                           quantityToBuy, 
+                           (key, oldValue) => oldValue + quantityToBuy);
+        
+        Interlocked.Add(ref _totalQuantityBought, quantityToBuy);
+    }
+
+    public bool TrySellShirt(string code)
+    {
+        // race condition (bug)
+        // if(!_stock.TryGetValue(code, out int stock) && stock > 0)
+        // {
+        //     --_stock[code];
+        //     ++_totalQuantitySold;
+        //     return true;
+        // }
+        // return false;
+
+
+        // solution
+        bool success = false;
+        int newStockLevel 
+            = _stock.AddOrUpdate(code,
+                                // for add
+                                (itemName) => {success = false; return 0; }, 
+                                // for update
+                                (itemName, oldValue) => 
+                                {
+                                    if(oldValue == 0)
+                                    {
+                                        success = false;
+                                        return 0;
+                                    }
+                                    else
+                                    {
+                                        success = true;
+                                        return oldValue - 1;
+                                    }
+
+                                });
+
+        if(success)
+            Interlocked.Increment(ref _totalQuantitySold);
+        return success;
+    }
+
+    public void DisplayStock()
+    {
+        Console.WriteLine("Stock levels by item:");
+        foreach(var shirt in TShirtProvider.AllShirts)
+        {
+            //_stock.TryGetValue(shirt.Code, out int stockLevel);
+            // GetorAdd ensures item is in the dict while TryGetValue doesn't
+            // Either would work for this case
+            var stockLevel = _stock.GetOrAdd(shirt.Code, 0);
+            Console.WriteLine($"{shirt.Name, -30}: {stockLevel}");
+        }
+
+        var totalStock = _stock.Values.Sum(); //linq
+
+        Console.WriteLine($"Bought = {_totalQuantityBought}");
+        Console.WriteLine($"Sold  = {_totalQuantityBought}");
+        Console.WriteLine($"Stock = {_totalQuantityBought}");
+        
+        int error = totalStock + _totalQuantitySold - _totalQuantityBought;
+        if(error == 0)
+            Console.WriteLine("Stock levels match");
+        else
+            Console.WriteLine($"Error in stock level: {error}");
+    }
+}
+
+public class SalesPerson
+{
+    public string Name {get;}
+    public SalesPerson(string name)
+    {
+        Name = name;
+    }
+
+    public void Work(TimeSpan workDay, StockController controller, LogTradesQueue tradesQueue)
+    {
+        DateTime start = DateTime.UtcNow;
+        while(DateTime.UtcNow - start < workDay)
+        {
+            var msg = ServeCustomer(controller, tradesQueue);
+            if(msg != null)
+                Console.WriteLine($"{Name}: {msg}");
+        }
+
+    }
+
+    public string ServeCustomer(StockController controller, LogTradesQueue tradesQueue)
+    {
+        Thread.Sleep(Rnd.NextInt(20));
+        var shirt = TShirtProvider.SelectRandomShirt();
+        string code = shirt.Code;
+
+        bool custSells = Rnd.TrueWithProb(1.0/6.0);
+        if(custSells)
+        {
+            int quantity = Rnd.NextInt(9) + 1;
+            controller.BuyShirts(code, quantity);
+            tradesQueue.QueueTradeForLogging(
+                new Trade(this, shirt, TradeType.Purchase, quantity)
+            );
+            return $"Bought {quantity} of {shirt}";
+        }
+        else
+        {
+            bool success = controller.TrySellShirt(code);
+            if(success)
+            {
+                tradesQueue.QueueTradeForLogging(
+                    new Trade(this, shirt, TradeType.Sale, 1)
+                );
+                return $"Sold {shirt}";
+            }
+            return $"Couldn't sell {shirt}: Out of stock";
+        }
+    }
+}
+
+public class TShirt
+{
+    public string Code {get;}
+    public string Name {get;}
+    public int PricePence {get;}
+
+    public TShirt(string code, string name, int pricePence)
+    {
+        Code = code;
+        Name = name;
+        PricePence = pricePence;
+    }
+
+    public override string ToString() => $"{Name} ({DisplayPrice(PricePence)})";
+
+    private string DisplayPrice(int pricePence) => $"${pricePence/100}.{pricePence%100:00}";  // 2nd $ is dollar
+}
+
+// Randome class helper
+public class Rnd
+{
+    private static Random _generator = new Random();
+    public static int NextInt(int max) => _generator.Next(max);
+
+    // Neat function getting a probability and return its chances. Between 0.0 and 1
+    public static bool TrueWithProb(double probOfTrue) => _generator.NextDouble() < probOfTrue;
+}
+
+public static class TShirtProvider
+{
+    // can't modify and also thread safe
+    public static ImmutableArray<TShirt> AllShirts {get;} = ImmutableArray.Create(
+        new TShirt("docker", "Docker", 200),
+        new TShirt("bigData", "Big Data", 100),
+        new TShirt("lc", "Leetcode", 300),
+        new TShirt("kcdc", "KcDc", 450),
+        new TShirt("ms", "Microsoft", 220),
+        new TShirt("ebay", "Ebay", 350),
+        new TShirt("so", "Stack Overflow", 500)
+    );
+
+    public static ImmutableDictionary<string, TShirt> AllShirtsByCode {get; } 
+        = AllShirts.ToImmutableDictionary(x => x.Code);
+    
+    public static TShirt SelectRandomShirt()
+    {
+        int selectedIndex = Rnd.NextInt(AllShirts.Length);
+        return AllShirts[selectedIndex];
+    }
+}
+
+public enum TradeType {Sale, Purchase}
+
+public class Trade
+{
+    public SalesPerson Person {get; private set;}
+    public TShirt Shirt {get; private set;}
+    public int Quantity {get; private set;}
+    public TradeType Type {get; private set;}
+    public bool IsSale => Type == TradeType.Sale;
+
+    public Trade(SalesPerson person, TShirt shirt, TradeType type, int quantitySold)
+    {
+        Person = person;
+        Shirt = shirt;
+        Type = type;
+        Quantity = quantitySold;
+    }
+
+    public override string ToString()
+    {
+        string typeText = IsSale ? "bought" : "sold";
+		return $"{Person} {typeText} {Quantity} {Shirt.Name}";
+    }
+}
+
+public class StaffRecords
+{
+    private ConcurrentDictionary<SalesPerson, int> _commissions
+        = new ConcurrentDictionary<SalesPerson, int>();
+
+    public void LogTrade(Trade trade)
+    {
+        Thread.Sleep(30); // simulate long processing
+        if(trade.IsSale)
+        {
+            int tradeValue = trade.Shirt.PricePence * trade.Quantity;
+            int commission = tradeValue / 100;
+            _commissions.AddOrUpdate(
+                trade.Person,
+                commission,
+                (key, oldValue) => oldValue + commission
+            );
+        }
+    }
+    
+    public void DisplayComissions(IEnumerable<SalesPerson> people)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Bonus by salesperson:");
+        foreach(var person in people)
+        {
+            var bonus = _commissions.GetOrAdd(person, 0);
+            Console.WriteLine($"{person.Name, 15} earned ${bonus / 100}.{bonus % 100:00}");
+        }
+    }
+
+}
+
+public class LogTradesQueue
+{
+    private IProducerConsumerCollection<Trade> _tradesToLog 
+			= new ConcurrentQueue<Trade>();
+    private readonly StaffRecords _staffLogs;
+    private bool _workingDayComplete;
+    public LogTradesQueue(StaffRecords staffLogs)
+    {
+        _staffLogs = staffLogs;
+    }
+    public void SetNoMoreTrades() => _workingDayComplete = true;
+    public void QueueTradeForLogging(Trade trade) => _tradesToLog.TryAdd(trade);
+
+    public void MonitorAndLogTrades()
+    {
+        while (true)
+        {
+            Trade nextTrade;
+            bool done = _tradesToLog.TryTake(out nextTrade);
+            if (done)
+            {
+                _staffLogs.LogTrade(nextTrade);
+                Console.WriteLine(
+                    $"Processing transaction from {nextTrade.Person.Name}");
+            }
+            else if (_workingDayComplete)
+            {
+                Console.WriteLine("No more sales to log - exiting");
+                return;
+            }
+            else
+            {
+                // polling and waiting... not efficient.
+                // see next section for better solution
+                Console.WriteLine("No transactions available");
+                Thread.Sleep(500);
+            }
+        }
+    }
+}
+
+var controller = new StockController();
+var workDay = new TimeSpan(0, 0, 0, 0, 500);
+var staffLogs = new StaffRecords();
+var tradesQueue = new LogTradesQueue(staffLogs);
+
+SalesPerson [] staff = 
+{
+    new SalesPerson("Tim"),
+    new SalesPerson("John"),
+    new SalesPerson("Peter"),
+    new SalesPerson("Kim")
+};
+
+var salesTasks = new List<Task>();
+foreach(var person in staff)
+{
+    salesTasks.Add(
+        Task.Run(() => person.Work(workDay, controller, tradesQueue))
+    );
+}
+
+Task[] loggingTasks = 
+{
+    Task.Run(() => tradesQueue.MonitorAndLogTrades()),
+    Task.Run(() => tradesQueue.MonitorAndLogTrades())
+};
+
+Task.WaitAll(salesTasks.ToArray());
+tradesQueue.SetNoMoreTrades();
+Task.WaitAll(loggingTasks);
+
+controller.DisplayStock();
+staffLogs.DisplayComissions(staff);
+
+#!markdown
+
+### Better Approach - Avoid Polling via BlockingCollection
+
+#### BlockingCollection<T> encapsulates producer-consumer collections
+* Can wait for items to be added
+* Simplifies code
+* Avoid polling
+
+#### Consuming enumerable
+* Consume items with foreach
+
+#!csharp
+
+using System.Collections.Immutable;
+using System.Threading;
+using System.Collections.Concurrent;
+
+public class StockController
+{
+    private ConcurrentDictionary<string, int> _stock = new ConcurrentDictionary<string, int>();
+    int _totalQuantityBought;
+    int _totalQuantitySold;
+
+    public void BuyShirts(string code, int quantityToBuy)
+    {   
+        // race condition (bug)
+        // if(!_stock.ContainsKey(code))
+        //  _stock.TryAdd(code, 0);
+        //_stock[code] += quantityToBuy;
+        //_totalQuantityBought += quantityToBuy;
+        
+        // solution
+        _stock.AddOrUpdate(code, 
+                           quantityToBuy, 
+                           (key, oldValue) => oldValue + quantityToBuy);
+        
+        Interlocked.Add(ref _totalQuantityBought, quantityToBuy);
+    }
+
+    public bool TrySellShirt(string code)
+    {
+        // race condition (bug)
+        // if(!_stock.TryGetValue(code, out int stock) && stock > 0)
+        // {
+        //     --_stock[code];
+        //     ++_totalQuantitySold;
+        //     return true;
+        // }
+        // return false;
+
+
+        // solution
+        bool success = false;
+        int newStockLevel 
+            = _stock.AddOrUpdate(code,
+                                // for add
+                                (itemName) => {success = false; return 0; }, 
+                                // for update
+                                (itemName, oldValue) => 
+                                {
+                                    if(oldValue == 0)
+                                    {
+                                        success = false;
+                                        return 0;
+                                    }
+                                    else
+                                    {
+                                        success = true;
+                                        return oldValue - 1;
+                                    }
+
+                                });
+
+        if(success)
+            Interlocked.Increment(ref _totalQuantitySold);
+        return success;
+    }
+
+    public void DisplayStock()
+    {
+        Console.WriteLine("Stock levels by item:");
+        foreach(var shirt in TShirtProvider.AllShirts)
+        {
+            //_stock.TryGetValue(shirt.Code, out int stockLevel);
+            // GetorAdd ensures item is in the dict while TryGetValue doesn't
+            // Either would work for this case
+            var stockLevel = _stock.GetOrAdd(shirt.Code, 0);
+            Console.WriteLine($"{shirt.Name, -30}: {stockLevel}");
+        }
+
+        var totalStock = _stock.Values.Sum(); //linq
+
+        Console.WriteLine($"Bought = {_totalQuantityBought}");
+        Console.WriteLine($"Sold  = {_totalQuantityBought}");
+        Console.WriteLine($"Stock = {_totalQuantityBought}");
+        
+        int error = totalStock + _totalQuantitySold - _totalQuantityBought;
+        if(error == 0)
+            Console.WriteLine("Stock levels match");
+        else
+            Console.WriteLine($"Error in stock level: {error}");
+    }
+}
+
+public class SalesPerson
+{
+    public string Name {get;}
+    public SalesPerson(string name)
+    {
+        Name = name;
+    }
+
+    public void Work(TimeSpan workDay, StockController controller, LogTradesQueue tradesQueue)
+    {
+        DateTime start = DateTime.UtcNow;
+        while(DateTime.UtcNow - start < workDay)
+        {
+            var msg = ServeCustomer(controller, tradesQueue);
+            if(msg != null)
+                Console.WriteLine($"{Name}: {msg}");
+        }
+
+    }
+
+    public string ServeCustomer(StockController controller, LogTradesQueue tradesQueue)
+    {
+        Thread.Sleep(Rnd.NextInt(20));
+        var shirt = TShirtProvider.SelectRandomShirt();
+        string code = shirt.Code;
+
+        bool custSells = Rnd.TrueWithProb(1.0/6.0);
+        if(custSells)
+        {
+            int quantity = Rnd.NextInt(9) + 1;
+            controller.BuyShirts(code, quantity);
+            tradesQueue.QueueTradeForLogging(
+                new Trade(this, shirt, TradeType.Purchase, quantity)
+            );
+            return $"Bought {quantity} of {shirt}";
+        }
+        else
+        {
+            bool success = controller.TrySellShirt(code);
+            if(success)
+            {
+                tradesQueue.QueueTradeForLogging(
+                    new Trade(this, shirt, TradeType.Sale, 1)
+                );
+                return $"Sold {shirt}";
+            }
+            return $"Couldn't sell {shirt}: Out of stock";
+        }
+    }
+}
+
+public class TShirt
+{
+    public string Code {get;}
+    public string Name {get;}
+    public int PricePence {get;}
+
+    public TShirt(string code, string name, int pricePence)
+    {
+        Code = code;
+        Name = name;
+        PricePence = pricePence;
+    }
+
+    public override string ToString() => $"{Name} ({DisplayPrice(PricePence)})";
+
+    private string DisplayPrice(int pricePence) => $"${pricePence/100}.{pricePence%100:00}";  // 2nd $ is dollar
+}
+
+// Randome class helper
+public class Rnd
+{
+    private static Random _generator = new Random();
+    public static int NextInt(int max) => _generator.Next(max);
+
+    // Neat function getting a probability and return its chances. Between 0.0 and 1
+    public static bool TrueWithProb(double probOfTrue) => _generator.NextDouble() < probOfTrue;
+}
+
+public static class TShirtProvider
+{
+    // can't modify and also thread safe
+    public static ImmutableArray<TShirt> AllShirts {get;} = ImmutableArray.Create(
+        new TShirt("docker", "Docker", 200),
+        new TShirt("bigData", "Big Data", 100),
+        new TShirt("lc", "Leetcode", 300),
+        new TShirt("kcdc", "KcDc", 450),
+        new TShirt("ms", "Microsoft", 220),
+        new TShirt("ebay", "Ebay", 350),
+        new TShirt("so", "Stack Overflow", 500)
+    );
+
+    public static ImmutableDictionary<string, TShirt> AllShirtsByCode {get; } 
+        = AllShirts.ToImmutableDictionary(x => x.Code);
+    
+    public static TShirt SelectRandomShirt()
+    {
+        int selectedIndex = Rnd.NextInt(AllShirts.Length);
+        return AllShirts[selectedIndex];
+    }
+}
+
+public enum TradeType {Sale, Purchase}
+
+public class Trade
+{
+    public SalesPerson Person {get; private set;}
+    public TShirt Shirt {get; private set;}
+    public int Quantity {get; private set;}
+    public TradeType Type {get; private set;}
+    public bool IsSale => Type == TradeType.Sale;
+
+    public Trade(SalesPerson person, TShirt shirt, TradeType type, int quantitySold)
+    {
+        Person = person;
+        Shirt = shirt;
+        Type = type;
+        Quantity = quantitySold;
+    }
+
+    public override string ToString()
+    {
+        string typeText = IsSale ? "bought" : "sold";
+		return $"{Person} {typeText} {Quantity} {Shirt.Name}";
+    }
+}
+
+public class StaffRecords
+{
+    private ConcurrentDictionary<SalesPerson, int> _commissions
+        = new ConcurrentDictionary<SalesPerson, int>();
+
+    public void LogTrade(Trade trade)
+    {
+        Thread.Sleep(30); // simulate long processing
+        if(trade.IsSale)
+        {
+            int tradeValue = trade.Shirt.PricePence * trade.Quantity;
+            int commission = tradeValue / 100;
+            _commissions.AddOrUpdate(
+                trade.Person,
+                commission,
+                (key, oldValue) => oldValue + commission
+            );
+        }
+    }
+    
+    public void DisplayComissions(IEnumerable<SalesPerson> people)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Bonus by salesperson:");
+        foreach(var person in people)
+        {
+            var bonus = _commissions.GetOrAdd(person, 0);
+            Console.WriteLine($"{person.Name, 15} earned ${bonus / 100}.{bonus % 100:00}");
+        }
+    }
+
+}
+
+public class LogTradesQueue
+{
+    private BlockingCollection<Trade> _tradesToLog 
+			= new BlockingCollection<Trade>(new ConcurrentQueue<Trade>());
+    private readonly StaffRecords _staffLogs;
+
+    public LogTradesQueue(StaffRecords staffLogs)
+    {
+        _staffLogs = staffLogs;
+    }
+    public void SetNoMoreTrades() => _tradesToLog.CompleteAdding();
+    public void QueueTradeForLogging(Trade trade) => _tradesToLog.TryAdd(trade);
+
+    public void MonitorAndLogTrades()
+    {
+        while (true)
+        {
+            try
+            {
+                var nextTrade = _tradesToLog.Take();
+                // if Take cannot take anything
+                // it will wait until something is available.
+                // pretty cool heh?
+
+                _staffLogs.LogTrade(nextTrade);
+                Console.WriteLine(
+                    $"Processing transaction from {nextTrade.Person.Name}");
+
+            }
+            catch(InvalidOperationException ex)
+            {
+                // will throw as soon as 
+                // CompleteAdding() is called. Dang !!!
+                Console.WriteLine(ex.Message);
+                return;
+            }
+        }
+    }
+
+    // Similar but shorter
+    public void MonitorAndLogTrades2()
+    {
+        foreach(Trade nextTrade in _tradesToLog.GetConsumingEnumerable())
+        {
+            _staffLogs.LogTrade(nextTrade);
+            Console.WriteLine(
+                $"Processing transaction from {nextTrade.Person.Name}");
+        }
+    }
+}
+
+var controller = new StockController();
+var workDay = new TimeSpan(0, 0, 0, 0, 500);
+var staffLogs = new StaffRecords();
+var tradesQueue = new LogTradesQueue(staffLogs);
+
+SalesPerson [] staff = 
+{
+    new SalesPerson("Tim"),
+    new SalesPerson("John"),
+    new SalesPerson("Peter"),
+    new SalesPerson("Kim")
+};
+
+var salesTasks = new List<Task>();
+foreach(var person in staff)
+{
+    salesTasks.Add(
+        Task.Run(() => person.Work(workDay, controller, tradesQueue))
+    );
+}
+
+Task[] loggingTasks = 
+{
+    Task.Run(() => tradesQueue.MonitorAndLogTrades()),
+    Task.Run(() => tradesQueue.MonitorAndLogTrades())
+};
+
+Task.WaitAll(salesTasks.ToArray());
+tradesQueue.SetNoMoreTrades();
+Task.WaitAll(loggingTasks);
+
+controller.DisplayStock();
+staffLogs.DisplayComissions(staff);
+
+#!markdown
+
+### Dictionary Performance
+
+#!csharp
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Diagnostics;
+
+public static class Worker
+{
+    public static int DoSomething()
+    {
+        int total = 0;
+        for (int i = 0; i < 1000; i++)
+            total += i;
+        return total;
+    }
+}
+
+class SingleThreadBenchmark
+{
+    static void Populate(IDictionary<int, int> dict, int dictSize)
+    {
+        for (int i = 0; i < dictSize; i++)
+        {
+            dict.Add(i, 1);
+            Worker.DoSomething();
+        }
+    }
+    static int Enumerate(IDictionary<int, int> dict)
+    {
+        int total = 0;
+        foreach (var keyValPair in dict)
+        {
+            total += keyValPair.Value;
+            Worker.DoSomething();
+        }
+        return total;
+    }
+    static int Lookup(IDictionary<int, int> dict)
+    {
+        int total = 0;
+        //int count = dict.Count;
+        for(int i=0; i<dict.Count; i++)
+        {
+            total += dict[i];
+            Worker.DoSomething();
+        }
+        return total;
+    }
+
+    public static void Benchmark(IDictionary<int, int> dict, int dictSize)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+
+        stopwatch.Start();
+        Populate(dict, dictSize);
+        stopwatch.Stop();
+        Console.WriteLine($"Build:     {stopwatch.ElapsedMilliseconds} ms");
+
+        stopwatch.Restart();
+        int total = Enumerate(dict);
+        stopwatch.Stop();
+        Console.WriteLine($"Enumerate: {stopwatch.ElapsedMilliseconds} ms");
+        if (total != dictSize)
+            Console.WriteLine($"ERROR: Total was {total}, expected {dictSize}");
+
+        stopwatch.Restart();
+        int total2 = Lookup(dict);
+        stopwatch.Stop();
+        Console.WriteLine($"Lookup:    {stopwatch.ElapsedMilliseconds} ms");
+        if (total != dictSize)
+            Console.WriteLine($"ERROR: Total was {total2}, expected {dictSize}");
+    }
+
+}
+
+class ParallelBenchmark
+{
+    static void Populate(ConcurrentDictionary<int, int> dict, int dictSize)
+    {
+        Parallel.For(0, dictSize, (i) =>
+            {
+                dict.TryAdd(i, 1);
+                Worker.DoSomething();
+            });
+    }
+    static int Enumerate(ConcurrentDictionary<int, int> dict)
+    {
+        int expectedTotal = dict.Count;
+
+        int total = 0;
+        Parallel.ForEach(dict, keyValPair =>
+                {
+                    Interlocked.Add(ref total, keyValPair.Value);
+                    Worker.DoSomething();
+                });
+        return total;
+    }
+    static int Lookup(ConcurrentDictionary<int, int> dict)
+    {
+        int total = 0;
+        Parallel.For(0, dict.Count, (int i) =>
+            {
+                int count = dict.Count;
+                Interlocked.Add(ref total, dict[i]);
+                Worker.DoSomething();
+            });
+        return total;
+    }
+    public static void Benchmark(ConcurrentDictionary<int, int> dict, int dictSize)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+
+        stopwatch.Start();
+        Populate(dict, dictSize);
+        stopwatch.Stop();
+        Console.WriteLine($"Build:     {stopwatch.ElapsedMilliseconds} ms");
+
+        stopwatch.Restart();
+        int total = Enumerate(dict);
+        stopwatch.Stop();
+        Console.WriteLine($"Enumerate: {stopwatch.ElapsedMilliseconds} ms");
+        if (total != dictSize)
+            Console.WriteLine($"ERROR: Total was {total}, expected {dictSize}");
+
+        stopwatch.Restart();
+        int total2 = Lookup(dict);
+        stopwatch.Stop();
+        Console.WriteLine($"Lookup:    {stopwatch.ElapsedMilliseconds} ms");
+        if (total2 != dictSize)
+            Console.WriteLine($"ERROR: Total was {total2}, expected {dictSize}");
+    }
+}
+
+
+int dictSize = 200000;
+
+Console.WriteLine("Dictionary, single thread:");
+var dict = new Dictionary<int, int>();
+SingleThreadBenchmark.Benchmark(dict, dictSize);
+
+Console.WriteLine("\r\nConcurrentDictionary, single thread:");
+var dict2 = new ConcurrentDictionary<int, int>();
+SingleThreadBenchmark.Benchmark(dict2, dictSize);
+
+Console.WriteLine("\r\nConcurrentDictionary, multiple threads:");
+var dict3 = new ConcurrentDictionary<int, int>();
+ParallelBenchmark.Benchmark(dict3, dictSize);
+
+#!markdown
+
+### Advice
+
+* Don't rely on the state of a collection (contains a particular value, etc) because info can be out of date (due to other threads).
+* Dont query aggregate state (count, isEmpty etc) because it hits performance.
+
+#!markdown
+
+### Enumerating Concurrent Collection
+
+#### Concurrent Stack/Queue/Bag will take a snapshot at enumerating time. Concurrent Dictionary doesn't so we can take a snap shot if we want the data at the moment in time. Or else, the data can be unpredictable.
+
+#!csharp
+
+// Snapshot method
+var stock = new ConcurrentDictionary<string, int>();
+stock.TryAdd("kcdc", 0);
+stock.TryAdd("leetcode", 0);
+stock.TryAdd("docker", 0);
+
+foreach(var shirt in stock.ToArray()) // snap shot
+{
+    stock["kcdc"] += 1;
+    Console.WriteLine($"{shirt.Key} : {shirt.Value}");
+}
+
+stock["kcdc"] = 0;
+foreach(var shirt in stock) // no snap shot, enumerate anyway gives unpredictable result.
+{
+    stock["kcdc"] += 1;
+    Console.WriteLine($"{shirt.Key} : {shirt.Value}");
+}
