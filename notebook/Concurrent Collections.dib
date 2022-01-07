@@ -220,3 +220,205 @@ controller.DisplayStock();
 
 1) Avoid Methods that rely on knowing the state. Instead, favor TryMethods which don't presume the state.
 2) Code should allow for failure.
+
+### Race Condition
+
+#### Good Practice Guideline: Aim for one single concurrent collection method call per operation (i.e. AddOrUpdate).
+
+#!csharp
+
+using System.Collections.Immutable;
+using System.Threading;
+using System.Collections.Concurrent;
+
+public class StockController
+{
+    private ConcurrentDictionary<string, int> _stock = new ConcurrentDictionary<string, int>();
+    int _totalQuantityBought;
+    int _totalQuantitySold;
+
+    public void BuyShirts(string code, int quantityToBuy)
+    {   
+        // race condition (bug)
+        // if(!_stock.ContainsKey(code))
+        //  _stock.TryAdd(code, 0);
+        //_stock[code] += quantityToBuy;
+        //_totalQuantityBought += quantityToBuy;
+        
+        // solution
+        _stock.AddOrUpdate(code, 
+                           quantityToBuy, 
+                           (key, oldValue) => oldValue + quantityToBuy);
+        
+        Interlocked.Add(ref _totalQuantityBought, quantityToBuy);
+    }
+
+    public bool TrySellShirt(string code)
+    {
+        // race condition (bug)
+        // if(!_stock.TryGetValue(code, out int stock) && stock > 0)
+        // {
+        //     --_stock[code];
+        //     ++_totalQuantitySold;
+        //     return true;
+        // }
+        // return false;
+
+
+        // solution
+        bool success = false;
+        int newStockLevel 
+            = _stock.AddOrUpdate(code,
+                                // for add
+                                (itemName) => {success = false; return 0; }, 
+                                // for update
+                                (itemName, oldValue) => 
+                                {
+                                    if(oldValue == 0)
+                                    {
+                                        success = false;
+                                        return 0;
+                                    }
+                                    else
+                                    {
+                                        success = true;
+                                        return oldValue - 1;
+                                    }
+
+                                });
+
+        if(success)
+            Interlocked.Increment(ref _totalQuantitySold);
+        return success;
+    }
+
+    public void DisplayStock()
+    {
+        Console.WriteLine("Stock levels by item:");
+        foreach(var shirt in TShirtProvider.AllShirts)
+        {
+            //_stock.TryGetValue(shirt.Code, out int stockLevel);
+            // GetorAdd ensures item is in the dict while TryGetValue doesn't
+            // Either would work for this case
+            var stockLevel = _stock.GetOrAdd(shirt.Code, 0);
+            Console.WriteLine($"{shirt.Name, -30}: {stockLevel}");
+        }
+
+        var totalStock = _stock.Values.Sum(); //linq
+
+        Console.WriteLine($"Bought = {_totalQuantityBought}");
+        Console.WriteLine($"Sold  = {_totalQuantityBought}");
+        Console.WriteLine($"Stock = {_totalQuantityBought}");
+        
+        int error = totalStock + _totalQuantitySold - _totalQuantityBought;
+        if(error == 0)
+            Console.WriteLine("Stock levels match");
+        else
+            Console.WriteLine($"Error in stock level: {error}");
+    }
+}
+
+public class SalesPerson
+{
+    public string Name {get;}
+    public SalesPerson(string name)
+    {
+        Name = name;
+    }
+
+    public void Work(TimeSpan workDay, StockController controller)
+    {
+        DateTime start = DateTime.UtcNow;
+        while(DateTime.UtcNow - start < workDay)
+        {
+            var msg = ServeCustomer(controller);
+            if(msg != null)
+                Console.WriteLine($"{Name}: {msg}");
+        }
+
+    }
+
+    public string ServeCustomer(StockController controller)
+    {
+        Thread.Sleep(Rnd.NextInt(3));
+        var shirt = TShirtProvider.SelectRandomShirt();
+        string code = shirt.Code;
+
+        bool custSells = Rnd.TrueWithProb(1.0/6.0);
+        if(custSells)
+        {
+            int quantity = Rnd.NextInt(9) + 1;
+            controller.BuyShirts(code, quantity);
+            return $"Bought {quantity} of {shirt}";
+        }
+        else
+        {
+            bool success = controller.TrySellShirt(code);
+            if(success)
+                return $"Sold {shirt}";
+            return $"Couldn't sell {shirt}: Out of stock";
+        }
+    }
+}
+
+public class TShirt
+{
+    public string Code {get;}
+    public string Name {get;}
+    public int PricePence {get;}
+
+    public TShirt(string code, string name, int pricePence)
+    {
+        Code = code;
+        Name = name;
+        PricePence = pricePence;
+    }
+
+    public override string ToString() => $"{Name} ({DisplayPrice(PricePence)})";
+
+    private string DisplayPrice(int pricePence) => $"${pricePence/100}.{pricePence%100:00}";  // 2nd $ is dollar
+}
+
+// Randome class helper
+public class Rnd
+{
+    private static Random _generator = new Random();
+    public static int NextInt(int max) => _generator.Next(max);
+
+    // Neat function getting a probability and return its chances. Between 0.0 and 1
+    public static bool TrueWithProb(double probOfTrue) => _generator.NextDouble() < probOfTrue;
+}
+
+public static class TShirtProvider
+{
+    // can't modify and also thread safe
+    public static ImmutableArray<TShirt> AllShirts {get;} = ImmutableArray.Create(
+        new TShirt("docker", "Docker", 200),
+        new TShirt("bigData", "Big Data", 100),
+        new TShirt("lc", "Leetcode", 300),
+        new TShirt("kcdc", "KcDc", 450),
+        new TShirt("ms", "Microsoft", 220),
+        new TShirt("ebay", "Ebay", 350),
+        new TShirt("so", "Stack Overflow", 500)
+    );
+
+    public static ImmutableDictionary<string, TShirt> AllShirtsByCode {get; } 
+        = AllShirts.ToImmutableDictionary(x => x.Code);
+    
+    public static TShirt SelectRandomShirt()
+    {
+        int selectedIndex = Rnd.NextInt(AllShirts.Length);
+        return AllShirts[selectedIndex];
+    }
+}
+
+var controller = new StockController();
+var workDay = new TimeSpan(0, 0, 0, 0, 500); // 500 ms
+var task1 = Task.Run(() => new SalesPerson("Tim").Work(workDay, controller));
+var task2 = Task.Run(() => new SalesPerson("Julie").Work(workDay, controller));
+var task3 = Task.Run(() => new SalesPerson("Michael").Work(workDay, controller));
+var task4 = Task.Run(() => new SalesPerson("Bill").Work(workDay, controller));
+
+Task.WaitAll(task1, task2, task3, task4);
+
+controller.DisplayStock();
