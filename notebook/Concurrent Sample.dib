@@ -15,12 +15,13 @@ async Task<int> DoWork(string workName, int amount)
     return 1;
 }
 
-var fillPotTask = DoWork("fill pot with water from water tank", 1000);
 var fillWaterTank = DoWork("re fill water filtering tank", 2000);
+var fillPotTask = DoWork("fill pot with water from water tank", 1000);
 
-await fillPotTask; // wait for pot to be filled before we can boil
-var startBoilingPot = DoWork("Start boiling pot", 900);
+await fillPotTask; // wait for pot to be filled 
+// now we can boil WHILE the fillWaterTank is still going with no interruption
+var startBoilingPot = DoWork("Start boiling pot", 900); 
 
-
+// since filling the water tank has more amount, it is expected to finish last. 
 Task.WaitAll(fillPotTask, fillWaterTank);
 Console.WriteLine("We have water in pot and refill the tank for next the person.")
