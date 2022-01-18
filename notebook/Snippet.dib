@@ -49,3 +49,9 @@ public static bool IsSystemAccount()
 }
 
 Print(IsSystemAccount());
+
+#!csharp
+
+string test = "aaa.aaa";
+test = test.TrimEnd('a');
+Console.Write(test);
