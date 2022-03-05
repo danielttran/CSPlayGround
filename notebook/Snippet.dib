@@ -52,6 +52,12 @@ Print(IsSystemAccount());
 
 #!csharp
 
-string test = "aaa.aaa";
-test = test.TrimEnd('a');
-Console.Write(test);
+bool test = true;
+
+Console.WriteLine(test.ToString());
+
+#!csharp
+
+var test = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddDays(20);
+
+Console.WriteLine(test.ToString());
