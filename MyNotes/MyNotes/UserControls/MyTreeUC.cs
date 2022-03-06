@@ -18,6 +18,8 @@ namespace MyNotes.UserControls
             set { data = value; }
         }
 
+        public event EventHandler<TreeNodeMouseClickEventArgs> OnNodeClicked;
+
         public MyTreeUC()
         {
             InitializeComponent();
@@ -26,18 +28,11 @@ namespace MyNotes.UserControls
 
         private void InitTreeView()
         {
-            //myTreeView.BeginUpdate();
-            //myTreeView.Nodes.Add("Parent");
-            //myTreeView.Nodes[0].Nodes.Add("Child 1");
-            //myTreeView.Nodes[0].Nodes.Add("Child 2");
-            //myTreeView.Nodes[0].Nodes[1].Nodes.Add("Grandchild");
-            //myTreeView.Nodes[0].Nodes[1].Nodes[0].Nodes.Add("Great Grandchild");
-            //myTreeView.EndUpdate();
-
-
             var table = Data.GetTreeData().ContinueWith((ret) =>
             {
+                myTreeView.BeginUpdate();
                 InitTree(ret.Result);
+                myTreeView.EndUpdate();
             });
         }
 
@@ -55,18 +50,27 @@ namespace MyNotes.UserControls
                     AppendNodeToTree(treeModel);
                 }
             }
+
+            myTreeView.ExpandAll();
+
+            myTreeView.NodeMouseClick += MyTreeView_NodeMouseClick1;
+        }
+
+        private void MyTreeView_NodeMouseClick1(object? sender, TreeNodeMouseClickEventArgs e)
+        {
+            OnNodeClicked(this, e);
         }
 
         private void AppendNodeToTree(TreeModel node)
         {
-            var parent = FindParentNode(node.Parent_Id.ToString(), myTreeView.Nodes[0]);
+            var parent = FindParentNode(node.Parent_Id.ToString(), myTreeView.Nodes[0]); // only have 1 root
             if (parent != null)
             {
                 parent.Nodes.Add(node.Id.ToString(), node.Name);
             }
         }
 
-        private TreeNode FindParentNode(string parentId, TreeNode rootNode)
+        private TreeNode? FindParentNode(string parentId, TreeNode rootNode)
         {
             if(rootNode.Name == parentId)
                 return rootNode;

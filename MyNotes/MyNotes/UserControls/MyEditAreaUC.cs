@@ -16,5 +16,10 @@ namespace MyNotes.UserControls
         {
             InitializeComponent();
         }
+
+        internal void DisplayNodeContent(string? nodeId)
+        {
+            
+        }
     }
 }

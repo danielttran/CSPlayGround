@@ -6,7 +6,16 @@ namespace MyNotes
         {
             InitializeComponent();
 
-
+            myTree.OnNodeClicked += MyTree_OnNodeClicked;
         }
+
+        private void MyTree_OnNodeClicked(object? sender, TreeNodeMouseClickEventArgs e)
+        {
+            var nodeId = e?.Node?.Name;
+
+            myEdit.DisplayNodeContent(nodeId);
+        }
+
+
     }
 }
