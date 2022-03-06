@@ -83,6 +83,7 @@ namespace PowerPoint
                                     continue;
 
                                 ISlide slide = ppIn.Slides[i].Clone();
+                                
                                 ppOut.Slides.Add(slide);
                             }
                             ppIn.Close();
