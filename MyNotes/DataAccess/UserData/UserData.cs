@@ -19,11 +19,24 @@ namespace DataAccess.UserData
             
         }
 
-        public Task<IEnumerable<TreeModel>> GetTreeData()
+        public Task<IEnumerable<TreeModel>> GetTreeData(int Parent_Id = 0)
         {
-            var query = "SELECT * FROM Tree ORDER BY Parent_Id ASC";
-            return _db.LoadData<TreeModel, dynamic>(query, new { });
+            string query = "SELECT * FROM Tree ";
+            if (Parent_Id > 0)
+            {
+                query += "WHERE Parent_Id = @Parent_Id";
+            }
+            else
+            {
+                query += "WHERE Parent_Id IS NULL";
+            }
+            return _db.LoadData<TreeModel, dynamic>(query, new { Parent_Id });
         }
 
+        public Task<IEnumerable<TreeModel>> GetTreeData()
+        {
+            string query = "SELECT * FROM Tree ORDER BY Parent_Id ASC";
+            return _db.LoadData<TreeModel, dynamic>(query, new { });
+        }
     }
 }

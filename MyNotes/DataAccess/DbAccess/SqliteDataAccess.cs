@@ -18,7 +18,7 @@ public class SqliteDataAccess : ISqliteDataAccess
     {
         using IDbConnection connection = new SqliteConnection(connectionString);
 
-        return await connection.QueryAsync<T>(query, new DynamicParameters());
+        return await connection.QueryAsync<T>(query, new DynamicParameters(parameters));
     }
 
     public Task SaveData<T>(string query,

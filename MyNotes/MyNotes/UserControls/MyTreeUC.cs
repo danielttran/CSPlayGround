@@ -5,6 +5,19 @@ namespace MyNotes.UserControls
 {
     public partial class MyTreeUC : UserControl
     {
+        private UserData data;
+
+        public UserData Data
+        {
+            get 
+            {
+                if(data == null)
+                    data = new UserData();
+                return data; 
+            }
+            set { data = value; }
+        }
+
         public MyTreeUC()
         {
             InitializeComponent();
@@ -22,8 +35,7 @@ namespace MyNotes.UserControls
             //myTreeView.EndUpdate();
 
 
-            var data = new UserData();
-            var table = data.GetTreeData().ContinueWith((ret) =>
+            var table = Data.GetTreeData().ContinueWith((ret) =>
             {
                 InitTree(ret.Result);
             });
@@ -31,31 +43,44 @@ namespace MyNotes.UserControls
 
         private void InitTree(IEnumerable<TreeModel> result)
         {
-            foreach(var treeModel in result)
+            foreach (var treeModel in result)
             {
-                AddNodeToTree(treeModel);
-            }
-        }
-
-        private void AddNodeToTree(TreeModel ret)
-        {
-            if(ret.Parent_Id == 0)
-            {
-                // head
-                myTreeView.Nodes.Add(ret.Id.ToString(), ret.Name);
-            }
-            else
-            {
-                if(myTreeView.Nodes.ContainsKey(ret.Parent_Id.ToString()) == false)
+                if(treeModel.Parent_Id == 0)
                 {
-                    myTreeView.Nodes.Add(ret.Parent_Id.ToString(), string.Empty);
-                    myTreeView.Nodes[myTreeView.Nodes.IndexOfKey(ret.Parent_Id.ToString())].Nodes.Add(ret.Parent_Id.ToString(), ret.Name);
+                    // root
+                    myTreeView.Nodes.Add(treeModel.Id.ToString(), treeModel.Name);
                 }
                 else
                 {
-                    //myTreeView.Nodes[myTreeView.Nodes.IndexOfKey(ret.Parent_Id.ToString())].Nodes[myTreeView.Nodes.IndexOfKey(ret.Id.ToString())].Text = ret.Name;
+                    AppendNodeToTree(treeModel);
                 }
             }
+        }
+
+        private void AppendNodeToTree(TreeModel node)
+        {
+            var parent = FindParentNode(node.Parent_Id.ToString(), myTreeView.Nodes[0]);
+            if (parent != null)
+            {
+                parent.Nodes.Add(node.Id.ToString(), node.Name);
+            }
+        }
+
+        private TreeNode FindParentNode(string parentId, TreeNode rootNode)
+        {
+            if(rootNode.Name == parentId)
+                return rootNode;
+
+            foreach(TreeNode node in rootNode.Nodes)
+            {
+                if(node.Name == parentId)
+                    return node;
+
+                var next = FindParentNode(parentId, node);
+                if (next != null)
+                    return next;
+            }
+            return null;
         }
     }
 }
