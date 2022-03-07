@@ -8,19 +8,24 @@ namespace PowerPoint
         [STAThread]
         static void Main()
         {
-            RegApp();
+            var title = RegisterApp();
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new PowerPointHelperForm(title));
         }
 
-        private static void RegApp()
+        private static string RegisterApp()
         {
             var key = File.ReadAllText("key.txt").Trim();
             if (string.IsNullOrEmpty(key) == false)
             {
                 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(key);
+                return "Power Point Helper is licensed";
+            }
+            else
+            {
+                return "Power Point Helper is Unlicensed";
             }
         }
     }
