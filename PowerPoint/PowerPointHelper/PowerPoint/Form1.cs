@@ -8,18 +8,18 @@ namespace PowerPoint
     {
         public Form1()
         {
-            InitializeComponent(); 
+            InitializeComponent();
         }
 
         private List<string> fileList;
 
         public List<string> FileList
         {
-            get 
+            get
             {
-                if(fileList == null)
+                if (fileList == null)
                     fileList = new List<string>();
-                return fileList; 
+                return fileList;
             }
             set { fileList = value; }
         }
@@ -38,8 +38,8 @@ namespace PowerPoint
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                
-                foreach(var file in files)
+
+                foreach (var file in files)
                 {
                     FileList.Add(file);
                 }
@@ -57,7 +57,7 @@ namespace PowerPoint
             }
         }
 
-        
+
 
         private void clearBtn_Click(object sender, EventArgs e)
         {
@@ -70,9 +70,12 @@ namespace PowerPoint
             using (var ppOut = Presentation.Create())
             {
                 int i = 0;
+                foreach (var slide in ppOut.Slides)
+                {
+                    slide.SlideSize.Type = SlideSizeType.Custom;
+                }
                 try
                 {
-                    IPresentation firstPpt = null;
                     foreach (var file in FileList)
                     {
                         using (var ppIn = Presentation.Open(file))
@@ -83,8 +86,10 @@ namespace PowerPoint
                                     continue;
 
                                 ISlide slide = ppIn.Slides[i].Clone();
-                                
-                                ppOut.Slides.Add(slide);
+                                //slide.Background.Fill.FillType = FillType.Solid;
+                                //slide.Background.Fill.SolidFill.Color = ColorObject.Black;
+                                //slide.SlideSize.Width = (int)slide.SlideSize.Width;
+                                ppOut.Slides.Add(slide, PasteOptions.SourceFormatting, ppIn);
                             }
                             ppIn.Close();
                         }
@@ -94,21 +99,24 @@ namespace PowerPoint
                 {
 
                 }
-                
+
 
                 var FilePath = GetSaveFilePath();
-                ppOut.Save(FilePath);
-                ppOut.Close();
-                // open
-                new Process
+                if (string.IsNullOrEmpty(FilePath) == false)
                 {
-                    StartInfo = new ProcessStartInfo(FilePath)
+                    ppOut.Save(FilePath);
+                    ppOut.Close();
+                    // open
+                    new Process
                     {
-                        UseShellExecute = true
-                    }
-                }.Start();
+                        StartInfo = new ProcessStartInfo(FilePath)
+                        {
+                            UseShellExecute = true
+                        }
+                    }.Start();
+
+                }
             }
-                
         }
 
         private string GetSaveFilePath()
