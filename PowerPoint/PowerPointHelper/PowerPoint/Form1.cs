@@ -86,9 +86,7 @@ namespace PowerPoint
                                     continue;
 
                                 ISlide slide = ppIn.Slides[i].Clone();
-                                //slide.Background.Fill.FillType = FillType.Solid;
-                                //slide.Background.Fill.SolidFill.Color = ColorObject.Black;
-                                //slide.SlideSize.Width = (int)slide.SlideSize.Width;
+
                                 ppOut.Slides.Add(slide, PasteOptions.SourceFormatting, ppIn);
                             }
                             ppIn.Close();
