@@ -9,8 +9,8 @@ namespace DataAccess.Models
     public class DataModel
     {
         public int Id { get; set; }
-        public byte?[] Data { get; set; }
-        public byte?[] Attachment { get; set; }
+        public string Data { get; set; }
+        public int? Type { get; set; }
 
     }
 }

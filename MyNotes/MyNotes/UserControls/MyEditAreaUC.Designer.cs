@@ -30,6 +30,7 @@
         {
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.EditAreaPanel = new System.Windows.Forms.Panel();
+            this.ControlPanel = new System.Windows.Forms.Panel();
             this.tableLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -39,6 +40,7 @@
             this.tableLayoutPanel.ColumnCount = 1;
             this.tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel.Controls.Add(this.EditAreaPanel, 0, 1);
+            this.tableLayoutPanel.Controls.Add(this.ControlPanel, 0, 0);
             this.tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel.Name = "tableLayoutPanel";
@@ -56,7 +58,14 @@
             this.EditAreaPanel.Size = new System.Drawing.Size(855, 810);
             this.EditAreaPanel.TabIndex = 0;
             // 
-            // MyEditArea
+            // ControlPanel
+            // 
+            this.ControlPanel.Location = new System.Drawing.Point(3, 3);
+            this.ControlPanel.Name = "ControlPanel";
+            this.ControlPanel.Size = new System.Drawing.Size(8, 8);
+            this.ControlPanel.TabIndex = 1;
+            // 
+            // MyEditAreaUC
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -65,7 +74,7 @@
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.Controls.Add(this.tableLayoutPanel);
             this.DoubleBuffered = true;
-            this.Name = "MyEditArea";
+            this.Name = "MyEditAreaUC";
             this.Size = new System.Drawing.Size(861, 866);
             this.tableLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -76,5 +85,6 @@
 
         private TableLayoutPanel tableLayoutPanel;
         private Panel EditAreaPanel;
+        private Panel ControlPanel;
     }
 }

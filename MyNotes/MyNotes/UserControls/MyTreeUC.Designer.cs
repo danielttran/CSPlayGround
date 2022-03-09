@@ -28,24 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.myTreeView = new MyNotes.UserControls.MyTreeView();
+            this.treeView = new MyNotes.UserControls.MyTreeView();
             this.SuspendLayout();
             // 
             // myTreeView
             // 
-            this.myTreeView.BackColor = System.Drawing.SystemColors.Window;
-            this.myTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.myTreeView.ImeMode = System.Windows.Forms.ImeMode.On;
-            this.myTreeView.Location = new System.Drawing.Point(0, 0);
-            this.myTreeView.Name = "myTreeView";
-            this.myTreeView.Size = new System.Drawing.Size(522, 845);
-            this.myTreeView.TabIndex = 0;
+            this.treeView.BackColor = System.Drawing.SystemColors.Window;
+            this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView.ImeMode = System.Windows.Forms.ImeMode.On;
+            this.treeView.Location = new System.Drawing.Point(0, 0);
+            this.treeView.Name = "myTreeView";
+            this.treeView.Size = new System.Drawing.Size(522, 845);
+            this.treeView.TabIndex = 0;
             // 
             // MyTreeUC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.myTreeView);
+            this.Controls.Add(this.treeView);
             this.Name = "MyTreeUC";
             this.Size = new System.Drawing.Size(522, 845);
             this.ResumeLayout(false);
@@ -54,6 +54,6 @@
 
         #endregion
 
-        private MyTreeView myTreeView;
+        private MyTreeView treeView;
     }
 }

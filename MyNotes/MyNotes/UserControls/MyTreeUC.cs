@@ -5,20 +5,6 @@ namespace MyNotes.UserControls
 {
     public partial class MyTreeUC : UserControl
     {
-        private UserData data;
-
-        public UserData Data
-        {
-            get 
-            {
-                if(data == null)
-                    data = new UserData();
-                return data; 
-            }
-            set { data = value; }
-        }
-
-        public event EventHandler<TreeNodeMouseClickEventArgs> OnNodeClicked;
 
         public MyTreeUC()
         {
@@ -28,56 +14,77 @@ namespace MyNotes.UserControls
 
         private void InitTreeView()
         {
-            var table = Data.GetTreeData().ContinueWith((ret) =>
+            var table = Mediator.Instance.Data.GetTreeData().ContinueWith((ret) =>
             {
-                myTreeView.BeginUpdate();
-                InitTree(ret.Result);
-                myTreeView.EndUpdate();
+                InitializeTree(ret.Result);
             });
         }
 
-        private void InitTree(IEnumerable<TreeModel> result)
+        private void InitializeTree(IEnumerable<TreeModel> result)
         {
             foreach (var treeModel in result)
             {
-                if(treeModel.Parent_Id == 0)
-                {
-                    // root
-                    myTreeView.Nodes.Add(treeModel.Id.ToString(), treeModel.Name);
-                }
-                else
-                {
-                    AppendNodeToTree(treeModel);
-                }
+                AppendNodeToTree(ref treeView, treeModel);
             }
 
-            myTreeView.ExpandAll();
-
-            myTreeView.NodeMouseClick += MyTreeView_NodeMouseClick1;
+            treeView.ExpandAll();
+            treeView.NodeMouseClick += TreeView_NodeMouseClick;
         }
 
-        private void MyTreeView_NodeMouseClick1(object? sender, TreeNodeMouseClickEventArgs e)
+        private void TreeView_NodeMouseClick(object? sender, TreeNodeMouseClickEventArgs e)
         {
-            OnNodeClicked(this, e);
-        }
-
-        private void AppendNodeToTree(TreeModel node)
-        {
-            var parent = FindParentNode(node.Parent_Id.ToString(), myTreeView.Nodes[0]); // only have 1 root
-            if (parent != null)
+            Mediator.Instance.NodeId = e.Node.Name;
+            if (e.Button == MouseButtons.Left)
             {
-                parent.Nodes.Add(node.Id.ToString(), node.Name);
+                // display item
+
             }
+            else
+            {
+                // show context menu
+            }
+        }
+
+        private void AppendNodeToTree(ref MyTreeView tree, TreeModel node)
+        {
+            if (tree == null)
+                return;
+
+            tree.BeginUpdate();
+            if (node.Parent_Id == 0)
+            {
+                // root node
+                tree.Nodes.Add(node.Id.ToString(), node.Name);
+            }
+            else
+            {
+                var parent = FindParentNode(node.Parent_Id.ToString(), tree.Nodes[0]);
+                if (parent != null)
+                {
+                    parent.Nodes.Add(node.Id.ToString(), node.Name);
+                }
+            }
+            tree.EndUpdate();
         }
 
         private TreeNode? FindParentNode(string parentId, TreeNode rootNode)
         {
-            if(rootNode.Name == parentId)
+            if (string.IsNullOrEmpty(parentId))
+            {
+                throw new ArgumentException($"'{nameof(parentId)}' cannot be null or empty.", nameof(parentId));
+            }
+
+            if (rootNode is null)
+            {
+                throw new ArgumentNullException(nameof(rootNode));
+            }
+
+            if (rootNode.Name == parentId)
                 return rootNode;
 
-            foreach(TreeNode node in rootNode.Nodes)
+            foreach (TreeNode node in rootNode.Nodes)
             {
-                if(node.Name == parentId)
+                if (node.Name == parentId)
                     return node;
 
                 var next = FindParentNode(parentId, node);

@@ -1,3 +1,4 @@
+
 namespace MyNotes
 {
     public partial class App : Form
@@ -5,17 +6,27 @@ namespace MyNotes
         public App()
         {
             InitializeComponent();
-
-            myTree.OnNodeClicked += MyTree_OnNodeClicked;
+            Mediator.Instance.NodeIdChanged += Instance_NodeIdChanged;
         }
 
-        private void MyTree_OnNodeClicked(object? sender, TreeNodeMouseClickEventArgs e)
+        private string nodeId;
+        public string NodeId
         {
-            var nodeId = e?.Node?.Name;
-
-            myEdit.DisplayNodeContent(nodeId);
+            get
+            {
+                return nodeId;
+            }
+            set
+            {
+                nodeId = value;
+                Mediator.Instance.NodeId = nodeId;
+            }
         }
 
+        private void Instance_NodeIdChanged(object? sender, EventArgs e)
+        {
+            //Main app probably doesn't need to do anything?
+        }
 
     }
 }

@@ -13,12 +13,12 @@ public class SqliteDataAccess : ISqliteDataAccess
         connectionString = ConnectionString;
     }
 
-    public async Task<IEnumerable<T>> LoadData<T, U>(string query,
-                                                     U parameters)
+    public Task<IEnumerable<T>> LoadData<T, U>(string query,
+                                               U parameters)
     {
         using IDbConnection connection = new SqliteConnection(connectionString);
 
-        return await connection.QueryAsync<T>(query, new DynamicParameters(parameters));
+        return connection.QueryAsync<T>(query, new DynamicParameters(parameters));
     }
 
     public Task SaveData<T>(string query,
