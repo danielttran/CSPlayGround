@@ -1,4 +1,6 @@
-﻿using MyNotes.Events;
+﻿using DataAccess.Models;
+using MyNotes.Events;
+using System.Text;
 
 namespace MyNotes.UserControls
 {
@@ -29,10 +31,32 @@ namespace MyNotes.UserControls
                 var q = x.Result;
             });
 
+            textObj.TextChanged += TextObj_TextChanged;
+
             EditAreaPanel.Controls.Clear();
             EditAreaPanel.Controls.Add(textObj);
 
             return Task.FromResult(0);
+        }
+
+        private void TextObj_TextChanged(object? sender, EventArgs e)
+        {
+            var rt = sender as RichTextBox;
+            if (rt != null)
+            {
+                var dataModel = new DataModel();
+
+                if (int.TryParse(Mediator.Instance.NodeId, out int tree_Id))
+                {
+                    dataModel.Tree_Id = tree_Id;
+                    dataModel.Data = Encoding.UTF8.GetBytes(rt.Text);
+                    dataModel.Type = 1;
+                }
+                Mediator.Instance.Data.SaveData(dataModel).ContinueWith(ret =>
+                {
+                    var q = ret;
+                });
+            }
         }
     }
 }

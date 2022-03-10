@@ -24,9 +24,19 @@ public class SqliteDataAccess : ISqliteDataAccess
     public Task SaveData<T>(string query,
                             T parameters)
     {
-        using IDbConnection connection = new SqliteConnection(connectionString);
+        try
+        {
+            using IDbConnection connection = new SqliteConnection(connectionString);
 
-        return connection.ExecuteAsync(sql: query,
-                                       param: parameters);
+            return connection.ExecuteAsync(sql: query,
+                                           param: parameters);
+
+        }
+        catch (Exception ex)
+        {
+
+            throw ex;
+        }
+        
     }
 }

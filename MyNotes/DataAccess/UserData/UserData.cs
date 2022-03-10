@@ -31,5 +31,11 @@ namespace DataAccess.UserData
             string query = "SELECT * FROM Data WHERE Id = @nodeId";
             return _db.LoadData<DataModel, dynamic>(query, new { nodeId });
         }
+
+        public Task SaveData(DataModel data)
+        {
+            string query = "insert into Data (Tree_Id, Data, Type) Values (@Tree_Id,@Data,@Type)";
+            return _db.SaveData<DataModel>(query, data);
+        }
     }
 }
