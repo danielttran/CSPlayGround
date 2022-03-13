@@ -64,7 +64,7 @@
   <ItemGroup>
     <None Include="dbo\Tables\CreateTables.sql" />
     <None Include="dbo\ReadyToUseEmptyDb\data.db3">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>

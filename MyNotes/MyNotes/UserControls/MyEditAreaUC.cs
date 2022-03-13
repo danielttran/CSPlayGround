@@ -22,13 +22,19 @@ namespace MyNotes.UserControls
         private Task<int> DisplayNodeContent(string nodeId)
         {
             var textObj = new RichTextBox();
+            textObj.Name = nodeId;
             textObj.Dock = DockStyle.Fill;
             textObj.Visible = true;
             textObj.BorderStyle = BorderStyle.None;
 
             Mediator.Instance.Data.GetData(nodeId).ContinueWith(x =>
             {
-                var q = x.Result;
+                var textObj = this.Controls.Find(nodeId, false);
+                if (textObj != null && textObj.Length > 0 && textObj[0] is RichTextBox)
+                {
+                    ((RichTextBox)textObj[0]).Rtf = (x?.Result.FirstOrDefault())?.Data;
+                }
+                
             });
 
             textObj.TextChanged += TextObj_TextChanged;
@@ -49,12 +55,12 @@ namespace MyNotes.UserControls
                 if (int.TryParse(Mediator.Instance.NodeId, out int tree_Id))
                 {
                     dataModel.Tree_Id = tree_Id;
-                    dataModel.Data = Encoding.UTF8.GetBytes(rt.Text);
+                    dataModel.Data = rt.Text;
                     dataModel.Type = 1;
                 }
                 Mediator.Instance.Data.SaveData(dataModel).ContinueWith(ret =>
                 {
-                    var q = ret;
+
                 });
             }
         }
