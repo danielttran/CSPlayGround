@@ -31,13 +31,14 @@
             this.treeView = new MyNotes.UserControls.MyTreeView();
             this.SuspendLayout();
             // 
-            // myTreeView
+            // treeView
             // 
             this.treeView.BackColor = System.Drawing.SystemColors.Window;
+            this.treeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView.ImeMode = System.Windows.Forms.ImeMode.On;
             this.treeView.Location = new System.Drawing.Point(0, 0);
-            this.treeView.Name = "myTreeView";
+            this.treeView.Name = "treeView";
             this.treeView.Size = new System.Drawing.Size(522, 845);
             this.treeView.TabIndex = 0;
             // 
