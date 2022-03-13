@@ -1,6 +1,7 @@
 ﻿using DataAccess.Models;
 using DataAccess.UserData;
 using MyNotes.Events;
+using System.Diagnostics;
 using System.Text;
 
 namespace MyNotes.UserControls
@@ -11,9 +12,11 @@ namespace MyNotes.UserControls
         /// <summary>
         /// 
         /// </summary>
-        public MyEditAreaUC() : base()
+        public MyEditAreaUC()
         {
             InitializeComponent();
+
+            Mediator.Instance.NodeIdChanged -= Instance_NodeIdChanged;
             Mediator.Instance.NodeIdChanged += Instance_NodeIdChanged;
         }
 
@@ -34,6 +37,10 @@ namespace MyNotes.UserControls
             if (e is NodeIdChanged nodeIds)
             {
                 DisplayNodeContent(nodeIds.PreviousNodeId, nodeIds.NewNodeId);
+            }
+            else
+            {
+                int q = 10;
             }
         }
 
@@ -56,14 +63,16 @@ namespace MyNotes.UserControls
                     }
 
                     // Save old node id content
-                    using var dataModel = new DataModel();
+                    using var nodeData = new DataModel();
                     if (int.TryParse(previousSelectedNodeId, out int tree_Id))
                     {
-                        dataModel.Tree_Id = tree_Id;
-                        dataModel.Data = textContent;
-                        dataModel.Type = 1;
+                        nodeData.Tree_Id = tree_Id;
+                        nodeData.Data = textContent;
+                        nodeData.Type = 1;
                     }
-                    Data.SaveData(dataModel);
+
+                    Mediator.Instance.TextChanged = false;
+                    Data.SaveData(nodeData);
                 }
             }
 
@@ -72,27 +81,45 @@ namespace MyNotes.UserControls
                 // display newly selected node
                 Data.GetData(newSelectedNodeId).ContinueWith(dataTask =>
                 {
-                    EditAreaPanel.Invoke(delegate 
+                    EditAreaPanel.Invoke(delegate
                     {
+                        EditAreaPanel.SuspendLayout();
+
+                        var timer = new Stopwatch();
+                        timer.Start();
+
                         EditAreaPanel.Controls.Clear();
 
-                        var richTextbox = new RichTextBox
+                        var richTextbox = new RichTextBox();
+                        richTextbox.SuspendLayout();
+
+                        richTextbox.Name = newSelectedNodeId;
+                        richTextbox.Dock = DockStyle.Fill;
+                        richTextbox.BorderStyle = BorderStyle.None;
+                        richTextbox.AllowDrop = true;
+
+                        try
                         {
-                            Name = newSelectedNodeId,
-                            Dock = DockStyle.Fill,
-                            BorderStyle = BorderStyle.None,
+                            richTextbox.Rtf = dataTask?.Result.FirstOrDefault()?.Data;
+                        }
+                        catch
+                        {
+                            richTextbox.Rtf = null;
+                        }
+                        richTextbox.ResumeLayout();
 
-                        };
-
-                        richTextbox.Rtf = dataTask?.Result.FirstOrDefault()?.Data;
                         richTextbox.TextChanged += richTextBox_TextChanged;
-                        
-                        EditAreaPanel.Controls.Add(richTextbox);    
+
+                        EditAreaPanel.Controls.Add(richTextbox);
+
+                        EditAreaPanel.ResumeLayout();
+
+                        timer.Stop();
+                        var totalTime = timer.ElapsedMilliseconds;
+                        int q = 10;
                     });
                 });
             }
-
-            Mediator.Instance.TextChanged = false;
         }
 
 

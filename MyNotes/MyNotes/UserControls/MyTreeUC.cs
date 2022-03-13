@@ -34,12 +34,15 @@ namespace MyNotes.UserControls
 
         private void InitializeTree(IEnumerable<TreeModel> result)
         {
+            treeView.BeginUpdate();
             foreach (var treeModel in result)
             {
                 AppendNodeToTree(ref treeView, treeModel);
             }
 
             treeView.ExpandAll();
+            treeView.EndUpdate();
+
             treeView.NodeMouseClick += TreeView_NodeMouseClick;
         }
 
@@ -62,7 +65,6 @@ namespace MyNotes.UserControls
             if (tree == null)
                 return;
 
-            tree.BeginUpdate();
             if (node.Parent_Id == 0)
             {
                 // root node
@@ -76,7 +78,7 @@ namespace MyNotes.UserControls
                     parent.Nodes.Add(node.Id.ToString(), node.Name);
                 }
             }
-            tree.EndUpdate();
+
         }
 
         private TreeNode? FindParentNode(string parentId, TreeNode rootNode)
