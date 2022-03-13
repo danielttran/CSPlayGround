@@ -6,7 +6,7 @@ namespace MyNotes
         public App()
         {
             InitializeComponent();
-            Mediator.Instance.NodeIdChanged += Instance_NodeIdChanged;
+
         }
 
         private string nodeId;
@@ -23,9 +23,16 @@ namespace MyNotes
             }
         }
 
-        private void Instance_NodeIdChanged(object? sender, EventArgs e)
+        protected override void OnResizeBegin(EventArgs e)
         {
-            //Main app probably doesn't need to do anything?
+            SuspendLayout();
+            base.OnResizeBegin(e);
+        }
+
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+            ResumeLayout();
         }
 
     }

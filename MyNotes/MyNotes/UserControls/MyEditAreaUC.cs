@@ -89,13 +89,12 @@ namespace MyNotes.UserControls
                         timer.Start();
 
                         EditAreaPanel.Controls.Clear();
+                        GC.Collect();
 
                         var richTextbox = new MyRichText();
                         richTextbox.SuspendLayout();
 
                         richTextbox.Name = newSelectedNodeId;
-
-
 
                         try
                         {
