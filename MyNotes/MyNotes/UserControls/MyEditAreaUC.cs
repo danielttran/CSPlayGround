@@ -8,7 +8,10 @@ namespace MyNotes.UserControls
     public partial class MyEditAreaUC : UserControl
     {
 
-        public MyEditAreaUC()
+        /// <summary>
+        /// 
+        /// </summary>
+        public MyEditAreaUC() : base()
         {
             InitializeComponent();
             Mediator.Instance.NodeIdChanged += Instance_NodeIdChanged;
@@ -28,35 +31,33 @@ namespace MyNotes.UserControls
 
         private void Instance_NodeIdChanged(object? sender, EventArgs e)
         {
-            var nodeIds = e as NodeIdChanged;
-            if (nodeIds != null)
+            if (e is NodeIdChanged nodeIds)
             {
                 DisplayNodeContent(nodeIds.PreviousNodeId, nodeIds.NewNodeId);
-            } 
+            }
         }
 
-        private void DisplayNodeContent(string previousNodeId, string newNodeId)
+        private void DisplayNodeContent(string previousSelectedNodeId, string newSelectedNodeId)
         {
-            if (string.IsNullOrEmpty(previousNodeId) == false)
+            if (string.IsNullOrEmpty(previousSelectedNodeId) == false)
             {
                 if (Mediator.Instance.TextChanged)
                 {
                     var textContent = string.Empty;
                     // Find text
-                    var controls = EditAreaPanel.Controls.Find(previousNodeId, true);
+                    var controls = EditAreaPanel.Controls.Find(previousSelectedNodeId, true);
                     foreach (var control in controls)
                     {
-                        if (control is RichTextBox)
+                        if (control is RichTextBox box)
                         {
-                            textContent  = ((RichTextBox)control).Rtf;
+                            textContent = box.Rtf;
                             break;
                         }
                     }
 
                     // Save old node id content
-                    var dataModel = new DataModel();
-
-                    if (int.TryParse(previousNodeId, out int tree_Id))
+                    using var dataModel = new DataModel();
+                    if (int.TryParse(previousSelectedNodeId, out int tree_Id))
                     {
                         dataModel.Tree_Id = tree_Id;
                         dataModel.Data = textContent;
@@ -66,31 +67,38 @@ namespace MyNotes.UserControls
                 }
             }
 
-            if (string.IsNullOrEmpty(newNodeId) == false)
+            if (string.IsNullOrEmpty(newSelectedNodeId) == false)
             {
                 // display newly selected node
-                var dataTask = Data.GetData(newNodeId);
-                var textObj = new RichTextBox
+                Data.GetData(newSelectedNodeId).ContinueWith(dataTask =>
                 {
-                    Name = newNodeId,
-                    Dock = DockStyle.Fill,
-                    BorderStyle = BorderStyle.None
-                };
-                textObj.TextChanged += TextObj_TextChanged;
-                EditAreaPanel.Controls.Clear();
+                    EditAreaPanel.Invoke(delegate 
+                    {
+                        EditAreaPanel.Controls.Clear();
 
-                var txt = dataTask.Result.FirstOrDefault()?.Data;
-                textObj.Rtf = txt;
-                EditAreaPanel.Controls.Add(textObj);
+                        var richTextbox = new RichTextBox
+                        {
+                            Name = newSelectedNodeId,
+                            Dock = DockStyle.Fill,
+                            BorderStyle = BorderStyle.None,
+
+                        };
+
+                        richTextbox.Rtf = dataTask?.Result.FirstOrDefault()?.Data;
+                        richTextbox.TextChanged += richTextBox_TextChanged;
+                        
+                        EditAreaPanel.Controls.Add(richTextbox);    
+                    });
+                });
             }
 
             Mediator.Instance.TextChanged = false;
         }
 
-        private void TextObj_TextChanged(object? sender, EventArgs e)
+
+        private void richTextBox_TextChanged(object? sender, EventArgs e)
         {
             Mediator.Instance.TextChanged = true;
-
         }
     }
 }
