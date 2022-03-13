@@ -13,18 +13,6 @@ namespace MyNotes
         {
         }
 
-        private UserData data;
-        public UserData Data
-        {
-            get
-            {
-                if (data == null)
-                    data = new UserData();
-                return data;
-            }
-            set { data = value; }
-        }
-
         public event EventHandler NodeIdChanged;
 
         private string nodeId = string.Empty;
@@ -37,6 +25,16 @@ namespace MyNotes
                 nodeId = value;
             }
         }
+
+        public bool TextChanged = false;
+        private string richTextContent;
+
+        public string RichTextContent
+        {
+            get { return richTextContent; }
+            set { richTextContent = value; }
+        }
+
 
         private void OnNodeIdChanged(EventArgs e)
         {

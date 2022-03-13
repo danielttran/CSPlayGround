@@ -1,4 +1,5 @@
 ﻿using DataAccess.Models;
+using DataAccess.UserData;
 using MyNotes.Events;
 using System.Text;
 
@@ -6,63 +7,90 @@ namespace MyNotes.UserControls
 {
     public partial class MyEditAreaUC : UserControl
     {
+
         public MyEditAreaUC()
         {
             InitializeComponent();
             Mediator.Instance.NodeIdChanged += Instance_NodeIdChanged;
+        }
 
+        private UserData data;
+        public UserData Data
+        {
+            get
+            {
+                if (data == null)
+                    data = new UserData();
+                return data;
+            }
+            set { data = value; }
         }
 
         private void Instance_NodeIdChanged(object? sender, EventArgs e)
         {
             var nodeIds = e as NodeIdChanged;
-            DisplayNodeContent(nodeIds.NewNodeId);
+            if (nodeIds != null)
+            {
+                DisplayNodeContent(nodeIds.PreviousNodeId, nodeIds.NewNodeId);
+            } 
         }
 
-        private Task<int> DisplayNodeContent(string nodeId)
+        private void DisplayNodeContent(string previousNodeId, string newNodeId)
         {
-            var textObj = new RichTextBox();
-            textObj.Name = nodeId;
-            textObj.Dock = DockStyle.Fill;
-            textObj.Visible = true;
-            textObj.BorderStyle = BorderStyle.None;
-
-            Mediator.Instance.Data.GetData(nodeId).ContinueWith(x =>
+            if (string.IsNullOrEmpty(previousNodeId) == false)
             {
-                var textObj = this.Controls.Find(nodeId, false);
-                if (textObj != null && textObj.Length > 0 && textObj[0] is RichTextBox)
+                if (Mediator.Instance.TextChanged)
                 {
-                    ((RichTextBox)textObj[0]).Rtf = (x?.Result.FirstOrDefault())?.Data;
+                    var textContent = string.Empty;
+                    // Find text
+                    var controls = EditAreaPanel.Controls.Find(previousNodeId, true);
+                    foreach (var control in controls)
+                    {
+                        if (control is RichTextBox)
+                        {
+                            textContent  = ((RichTextBox)control).Rtf;
+                            break;
+                        }
+                    }
+
+                    // Save old node id content
+                    var dataModel = new DataModel();
+
+                    if (int.TryParse(previousNodeId, out int tree_Id))
+                    {
+                        dataModel.Tree_Id = tree_Id;
+                        dataModel.Data = textContent;
+                        dataModel.Type = 1;
+                    }
+                    Data.SaveData(dataModel);
                 }
-                
-            });
+            }
 
-            textObj.TextChanged += TextObj_TextChanged;
+            if (string.IsNullOrEmpty(newNodeId) == false)
+            {
+                // display newly selected node
+                var dataTask = Data.GetData(newNodeId);
+                var textObj = new RichTextBox
+                {
+                    Name = newNodeId,
+                    Dock = DockStyle.Fill,
+                    BorderStyle = BorderStyle.None
+                };
+                textObj.TextChanged += TextObj_TextChanged;
+                EditAreaPanel.Controls.Clear();
 
-            EditAreaPanel.Controls.Clear();
-            EditAreaPanel.Controls.Add(textObj);
+                var txt = dataTask.Result.FirstOrDefault()?.Data;
+                textObj.Rtf = txt;
+                EditAreaPanel.Controls.Add(textObj);
+            }
 
-            return Task.FromResult(0);
+            Mediator.Instance.TextChanged = false;
         }
 
         private void TextObj_TextChanged(object? sender, EventArgs e)
         {
-            var rt = sender as RichTextBox;
-            if (rt != null)
-            {
-                var dataModel = new DataModel();
+            Mediator.Instance.TextChanged = true;
 
-                if (int.TryParse(Mediator.Instance.NodeId, out int tree_Id))
-                {
-                    dataModel.Tree_Id = tree_Id;
-                    dataModel.Data = rt.Text;
-                    dataModel.Type = 1;
-                }
-                Mediator.Instance.Data.SaveData(dataModel).ContinueWith(ret =>
-                {
-
-                });
-            }
         }
     }
 }

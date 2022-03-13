@@ -12,9 +12,21 @@ namespace MyNotes.UserControls
             InitTreeView();
         }
 
+        private UserData data;
+        public UserData Data
+        {
+            get
+            {
+                if (data == null)
+                    data = new UserData();
+                return data;
+            }
+            set { data = value; }
+        }
+
         private void InitTreeView()
         {
-            var table = Mediator.Instance.Data.GetTreeData().ContinueWith((ret) =>
+            var table = Data.GetTreeData().ContinueWith((ret) =>
             {
                 InitializeTree(ret.Result);
             });

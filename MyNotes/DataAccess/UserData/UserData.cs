@@ -34,7 +34,7 @@ namespace DataAccess.UserData
 
         public Task SaveData(DataModel data)
         {
-            string query = "insert into Data (Tree_Id, Data, Type) Values (@Tree_Id, @Data, @Type)";
+            string query = "INSERT INTO Data (Tree_Id, data, Type) VALUES (@Tree_Id, @Data, @Type) ON CONFLICT(Tree_Id) DO Update set Data = @Data, Type = @Type";
             return _db.SaveData<DataModel>(query, data);
         }
     }
