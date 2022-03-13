@@ -2,13 +2,11 @@
 using DataAccess.UserData;
 using MyNotes.Events;
 using System.Diagnostics;
-using System.Text;
 
 namespace MyNotes.UserControls
 {
     public partial class MyEditAreaUC : UserControl
     {
-
         /// <summary>
         /// 
         /// </summary>
@@ -40,7 +38,7 @@ namespace MyNotes.UserControls
             }
             else
             {
-                int q = 10;
+                Debug.Assert(false);
             }
         }
 

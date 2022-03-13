@@ -5,7 +5,6 @@ namespace MyNotes.UserControls
 {
     public partial class MyTreeUC : UserControl
     {
-
         public MyTreeUC()
         {
             InitializeComponent();
