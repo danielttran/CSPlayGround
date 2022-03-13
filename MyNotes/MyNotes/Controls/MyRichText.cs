@@ -11,8 +11,8 @@ namespace MyNotes.UserControls
         public MyRichText() : base()
         {
             AllowDrop = true;
-            
-
+            Dock = DockStyle.Fill;
+            BorderStyle = BorderStyle.None;
         }
     }
 }

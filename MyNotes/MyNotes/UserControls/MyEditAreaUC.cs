@@ -55,7 +55,7 @@ namespace MyNotes.UserControls
                     var controls = EditAreaPanel.Controls.Find(previousSelectedNodeId, true);
                     foreach (var control in controls)
                     {
-                        if (control is RichTextBox box)
+                        if (control is MyRichText box)
                         {
                             textContent = box.Rtf;
                             break;
@@ -79,24 +79,23 @@ namespace MyNotes.UserControls
             if (string.IsNullOrEmpty(newSelectedNodeId) == false)
             {
                 // display newly selected node
+                EditAreaPanel.SuspendLayout();
                 Data.GetData(newSelectedNodeId).ContinueWith(dataTask =>
                 {
                     EditAreaPanel.Invoke(delegate
                     {
-                        EditAreaPanel.SuspendLayout();
-
+                        
                         var timer = new Stopwatch();
                         timer.Start();
 
                         EditAreaPanel.Controls.Clear();
 
-                        var richTextbox = new RichTextBox();
+                        var richTextbox = new MyRichText();
                         richTextbox.SuspendLayout();
 
                         richTextbox.Name = newSelectedNodeId;
-                        richTextbox.Dock = DockStyle.Fill;
-                        richTextbox.BorderStyle = BorderStyle.None;
-                        richTextbox.AllowDrop = true;
+
+
 
                         try
                         {
@@ -108,7 +107,7 @@ namespace MyNotes.UserControls
                         }
                         richTextbox.ResumeLayout();
 
-                        richTextbox.TextChanged += richTextBox_TextChanged;
+                        richTextbox.TextChanged += RichTextBox_TextChanged;
 
                         EditAreaPanel.Controls.Add(richTextbox);
 
@@ -122,8 +121,7 @@ namespace MyNotes.UserControls
             }
         }
 
-
-        private void richTextBox_TextChanged(object? sender, EventArgs e)
+        private void RichTextBox_TextChanged(object? sender, EventArgs e)
         {
             Mediator.Instance.TextChanged = true;
         }
