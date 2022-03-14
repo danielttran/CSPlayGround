@@ -13,8 +13,6 @@ namespace MyNotes.UserControls
         public MyEditAreaUC()
         {
             InitializeComponent();
-
-            Mediator.Instance.NodeIdChanged -= Instance_NodeIdChanged;
             Mediator.Instance.NodeIdChanged += Instance_NodeIdChanged;
         }
 
@@ -77,22 +75,22 @@ namespace MyNotes.UserControls
             if (string.IsNullOrEmpty(newSelectedNodeId) == false)
             {
                 // display newly selected node
-                EditAreaPanel.SuspendLayout();
                 Data.GetData(newSelectedNodeId).ContinueWith(dataTask =>
                 {
                     EditAreaPanel.Invoke(delegate
                     {
-                        
                         var timer = new Stopwatch();
                         timer.Start();
+
+                        EditAreaPanel.SuspendLayout();
 
                         EditAreaPanel.Controls.Clear();
                         GC.Collect();
 
-                        var richTextbox = new MyRichText();
-                        richTextbox.SuspendLayout();
-
-                        richTextbox.Name = newSelectedNodeId;
+                        var richTextbox = new MyRichText
+                        {
+                            Name = newSelectedNodeId
+                        };
 
                         try
                         {
@@ -102,17 +100,14 @@ namespace MyNotes.UserControls
                         {
                             richTextbox.Rtf = null;
                         }
-                        richTextbox.ResumeLayout();
 
                         richTextbox.TextChanged += RichTextBox_TextChanged;
-
                         EditAreaPanel.Controls.Add(richTextbox);
 
                         EditAreaPanel.ResumeLayout();
 
                         timer.Stop();
                         var totalTime = timer.ElapsedMilliseconds;
-                        int q = 10;
                     });
                 });
             }
