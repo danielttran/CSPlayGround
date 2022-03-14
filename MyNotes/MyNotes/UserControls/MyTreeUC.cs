@@ -43,24 +43,31 @@ namespace MyNotes.UserControls
             foreach (var menuItem in items)
             {
                 menuStrip.Items.Add(menuItem);
+                menuItem.Click += new EventHandler(MenuItem_Click);
             }
             ContextMenuStrip = menuStrip;
         }
 
         private List<ToolStripMenuItem> CreateMenuItems()
         {
+
             var MenuItems = new List<ToolStripMenuItem>();
-
-            var AddChildMenuItem = new ToolStripMenuItem
-            {
-                Text = "Add Child Node",
-                Name = "AddChildNode"
-
-            };
-            AddChildMenuItem.Click += new EventHandler(MenuItem_Click);
-            MenuItems.Add(AddChildMenuItem);
+            MenuItems.Add(CreateToolStripMenuItem("Add Child", "AddChildNode"));
+            MenuItems.Add(CreateToolStripMenuItem("Delete", "DeleteNode"));
+            MenuItems.Add(CreateToolStripMenuItem("Rename", "RenameNode"));
 
             return MenuItems;
+        }
+
+        private ToolStripMenuItem CreateToolStripMenuItem(string text, string name)
+        {
+            var toolStripMenuItem = new ToolStripMenuItem
+            {
+                Text = text,
+                Name = name
+
+            };
+            return toolStripMenuItem;
         }
 
 
@@ -73,6 +80,10 @@ namespace MyNotes.UserControls
                 case "AddChildNode":
                     // TODO
                     // Add new empty child node here
+                    break;
+                case "DeleteNode":
+                    break;
+                case "RenameNode":
                     break;
                 default:
                     break;
