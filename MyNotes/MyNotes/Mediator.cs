@@ -16,15 +16,20 @@ namespace MyNotes
         public event EventHandler NodeIdChanged;
 
         private string nodeId = string.Empty;
-        public string NodeId 
+        public string NodeId
         {
             get { return nodeId; }
             set
             {
-                OnNodeIdChanged(new NodeIdChanged(NodeId, value));
+                if (IsLeftClick)
+                {
+                    OnLeftClickNode(new NodeIdChanged(NodeId, value));
+                }
                 nodeId = value;
             }
         }
+
+        public bool IsLeftClick = true;
 
         public bool TextChanged = false;
         private string richTextContent;
@@ -35,8 +40,7 @@ namespace MyNotes
             set { richTextContent = value; }
         }
 
-
-        private void OnNodeIdChanged(EventArgs e)
+        private void OnLeftClickNode(EventArgs e)
         {
             NodeIdChanged?.Invoke(this, e);
         }

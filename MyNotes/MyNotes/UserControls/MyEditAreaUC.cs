@@ -94,7 +94,7 @@ namespace MyNotes.UserControls
 
                         try
                         {
-                            richTextbox.Rtf = dataTask?.Result.FirstOrDefault()?.Data;
+                            richTextbox.Rtf = dataTask.Result.FirstOrDefault()?.Data;
                         }
                         catch
                         {

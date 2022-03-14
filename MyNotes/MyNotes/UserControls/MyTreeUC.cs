@@ -5,12 +5,6 @@ namespace MyNotes.UserControls
 {
     public partial class MyTreeUC : UserControl
     {
-        public MyTreeUC()
-        {
-            InitializeComponent();
-            InitTreeView();
-        }
-
         private UserData data;
         public UserData Data
         {
@@ -23,12 +17,66 @@ namespace MyNotes.UserControls
             set { data = value; }
         }
 
-        private void InitTreeView()
+        public MyTreeUC()
+        {
+            SuspendLayout();
+
+            InitializeComponent();
+            InitializeTreeView();
+            InitializeContentMenu();
+
+            ResumeLayout();
+        }
+
+        private void InitializeTreeView()
         {
             var table = Data.GetTreeData().ContinueWith((ret) =>
             {
                 InitializeTree(ret.Result);
             });
+        }
+
+        private void InitializeContentMenu()
+        {
+            ContextMenuStrip menuStrip = new ContextMenuStrip();
+            List<ToolStripMenuItem> items = CreateMenuItems();
+            foreach (var menuItem in items)
+            {
+                menuStrip.Items.Add(menuItem);
+            }
+            ContextMenuStrip = menuStrip;
+        }
+
+        private List<ToolStripMenuItem> CreateMenuItems()
+        {
+            var MenuItems = new List<ToolStripMenuItem>();
+
+            var AddChildMenuItem = new ToolStripMenuItem
+            {
+                Text = "Add Child Node",
+                Name = "AddChildNode"
+
+            };
+            AddChildMenuItem.Click += new EventHandler(MenuItem_Click);
+            MenuItems.Add(AddChildMenuItem);
+
+            return MenuItems;
+        }
+
+
+        void MenuItem_Click(object sender, EventArgs e)
+        {
+            var menuItem = sender as ToolStripItem;
+
+            switch (menuItem?.Name)
+            {
+                case "AddChildNode":
+                    // TODO
+                    // Add new empty child node here
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void InitializeTree(IEnumerable<TreeModel> result)
@@ -47,16 +95,17 @@ namespace MyNotes.UserControls
 
         private void TreeView_NodeMouseClick(object? sender, TreeNodeMouseClickEventArgs e)
         {
-            Mediator.Instance.NodeId = e.Node.Name;
+            treeView.SelectedNode = e.Node;
             if (e.Button == MouseButtons.Left)
             {
-                // display item
-
+                // only load node if it's a left click
+                Mediator.Instance.IsLeftClick = true;
             }
             else
             {
-                // show context menu
+                Mediator.Instance.IsLeftClick = false;
             }
+            Mediator.Instance.NodeId = e.Node.Name;
         }
 
         private void AppendNodeToTree(ref MyTreeView tree, TreeModel node)
