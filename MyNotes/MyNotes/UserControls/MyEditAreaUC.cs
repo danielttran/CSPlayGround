@@ -68,14 +68,14 @@ namespace MyNotes.UserControls
                     }
 
                     Mediator.Instance.TextChanged = false;
-                    Data.SaveData(nodeData);
+                    Data.SaveDataModel(nodeData);
                 }
             }
 
             if (string.IsNullOrEmpty(newSelectedNodeId) == false)
             {
                 // display newly selected node
-                Data.GetData(newSelectedNodeId).ContinueWith(dataTask =>
+                Data.GetDataModel(newSelectedNodeId).ContinueWith(dataTask =>
                 {
                     EditAreaPanel.Invoke(delegate
                     {

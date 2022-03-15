@@ -1,5 +1,6 @@
 ﻿using DataAccess.Models;
 using DataAccess.UserData;
+using MyNotes.Forms;
 
 namespace MyNotes.UserControls
 {
@@ -30,7 +31,7 @@ namespace MyNotes.UserControls
 
         private void InitializeTreeView()
         {
-            var table = Data.GetTreeData().ContinueWith((ret) =>
+            var table = Data.GetTreeModel().ContinueWith((ret) =>
             {
                 InitializeTree(ret.Result);
             });
@@ -53,8 +54,9 @@ namespace MyNotes.UserControls
 
             var MenuItems = new List<ToolStripMenuItem>();
             MenuItems.Add(CreateToolStripMenuItem("Add Child", "AddChildNode"));
-            MenuItems.Add(CreateToolStripMenuItem("Delete", "DeleteNode"));
             MenuItems.Add(CreateToolStripMenuItem("Rename", "RenameNode"));
+
+            MenuItems.Add(CreateToolStripMenuItem("Delete", "DeleteNode"));
 
             return MenuItems;
         }
@@ -65,42 +67,94 @@ namespace MyNotes.UserControls
             {
                 Text = text,
                 Name = name
-
             };
             return toolStripMenuItem;
         }
 
-
         void MenuItem_Click(object sender, EventArgs e)
         {
             var menuItem = sender as ToolStripItem;
-
-            switch (menuItem?.Name)
+            if (int.TryParse(Mediator.Instance.NodeId, out int currentNode))
             {
-                case "AddChildNode":
-                    // TODO
-                    // Add new empty child node here
-                    break;
-                case "DeleteNode":
-                    break;
-                case "RenameNode":
-                    break;
-                default:
-                    break;
+                switch (menuItem?.Name)
+                {
+                    case "AddChildNode":
+                        AddChildNode(currentNode);
+                        break;
+                    case "RenameNode":
+                        RenameNode(currentNode);
+                        break;
+                    case "DeleteNode":
+                        break;
+                    default:
+                        break;
+                }
+                RefreshTree();
             }
+
+        }
+
+        private void RenameNode(int currentNode)
+        {
+            var nodeName = GetUserInput("Please enter node name");
+            if (string.IsNullOrEmpty(nodeName))
+                return;
+
+            var treeModel = new TreeModel
+            {
+                Name = nodeName,
+                Id = currentNode
+            };
+            Data.SaveTreeModel(treeModel);
+        }
+
+        private void AddChildNode(int currentNode)
+        {
+            var nodeName = GetUserInput("Please enter node name");
+            if (string.IsNullOrEmpty(nodeName))
+                return;
+
+            var treeModel = new TreeModel
+            {
+                Name = nodeName,
+                Parent_Id = currentNode
+            };
+            Data.SaveTreeModel(treeModel);
+
+        }
+
+        private string GetUserInput(string title)
+        {
+            var msgDialog = new GetUserInputDialog(title);
+            if (msgDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                return msgDialog.UserInput;
+            }
+            return string.Empty;
+        }
+
+        private void RefreshTree()
+        {
+            treeView.BeginUpdate();
+            treeView.Nodes.Clear();
+            var table = Data.GetTreeModel().ContinueWith((ret) =>
+            {
+                treeView.Invoke(delegate
+                {
+                    InitializeTree(ret.Result);
+                });
+            });
+            treeView.EndUpdate();
         }
 
         private void InitializeTree(IEnumerable<TreeModel> result)
         {
-            treeView.BeginUpdate();
             foreach (var treeModel in result)
             {
                 AppendNodeToTree(ref treeView, treeModel);
             }
-
             treeView.ExpandAll();
-            treeView.EndUpdate();
-
+            
             treeView.NodeMouseClick += TreeView_NodeMouseClick;
         }
 
