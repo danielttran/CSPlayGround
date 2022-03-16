@@ -118,7 +118,7 @@ namespace MyNotes.UserControls
 
         private void AddChildNode(int currentNode)
         {
-            var nodeName = GetUserInput("Please enter root note name");
+            var nodeName = GetUserInput("Please enter note name");
             if (string.IsNullOrEmpty(nodeName))
                 return;
 
@@ -132,9 +132,9 @@ namespace MyNotes.UserControls
 
         private void AddRootNode()
         {
-            var nodeName = GetUserInput("Please enter note name");
+            var nodeName = GetUserInput("Please enter root note name");
             if (string.IsNullOrEmpty(nodeName))
-                return;
+                nodeName = "Root";
 
             var treeModel = new TreeModel
             {
@@ -142,6 +142,7 @@ namespace MyNotes.UserControls
                 Parent_Id = 0
             };
             Data.SaveTreeModel(treeModel);
+
         }
 
         private string GetUserInput(string title)
@@ -205,7 +206,7 @@ namespace MyNotes.UserControls
             if (tree == null)
                 return;
 
-            if (node.Parent_Id == 0)
+            if (node.Parent_Id == 0 || node.Parent_Id == null)
             {
                 // root node
                 tree.Nodes.Add(node.Id.ToString(), node.Name);
@@ -245,6 +246,11 @@ namespace MyNotes.UserControls
                     return next;
             }
             return null;
+        }
+
+        ~MyTreeUC()
+        {
+            Data.Vacuum();
         }
     }
 }

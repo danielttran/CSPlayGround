@@ -29,6 +29,11 @@ namespace DataAccess.UserData
             return _db.SaveData<TreeModel>(query, data);
         }
 
+        public void Vacuum()
+        {
+            _db.SaveData("VACUUM;", new { });
+        }
+
         /// <summary>
         /// Deleting node and all its children
         /// in Tree and Data table
