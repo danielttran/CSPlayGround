@@ -61,3 +61,8 @@ Console.WriteLine(test.ToString());
 var test = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddDays(20);
 
 Console.WriteLine(test.ToString());
+
+#!csharp
+
+var TreeIdsToDelete = string.Join(",", "");
+Console.WriteLine(TreeIdsToDelete);

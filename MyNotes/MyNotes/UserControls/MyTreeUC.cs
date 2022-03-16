@@ -51,11 +51,9 @@ namespace MyNotes.UserControls
 
         private List<ToolStripMenuItem> CreateMenuItems()
         {
-
             var MenuItems = new List<ToolStripMenuItem>();
             MenuItems.Add(CreateToolStripMenuItem("Add Child", "AddChildNode"));
             MenuItems.Add(CreateToolStripMenuItem("Rename", "RenameNode"));
-
             MenuItems.Add(CreateToolStripMenuItem("Delete", "DeleteNode"));
 
             return MenuItems;
@@ -85,13 +83,23 @@ namespace MyNotes.UserControls
                         RenameNode(currentNode);
                         break;
                     case "DeleteNode":
+                        DeleteNode(currentNode);
                         break;
                     default:
                         break;
                 }
-                RefreshTree();
             }
+            else
+            {
+                // empty tree
+                AddRootNode();
+            }
+            RefreshTree();
+        }
 
+        private void DeleteNode(int currentNode)
+        {
+            Data.DeleteTreeNode(currentNode);
         }
 
         private void RenameNode(int currentNode)
@@ -110,7 +118,7 @@ namespace MyNotes.UserControls
 
         private void AddChildNode(int currentNode)
         {
-            var nodeName = GetUserInput("Please enter node name");
+            var nodeName = GetUserInput("Please enter root note name");
             if (string.IsNullOrEmpty(nodeName))
                 return;
 
@@ -120,7 +128,20 @@ namespace MyNotes.UserControls
                 Parent_Id = currentNode
             };
             Data.SaveTreeModel(treeModel);
+        }
 
+        private void AddRootNode()
+        {
+            var nodeName = GetUserInput("Please enter note name");
+            if (string.IsNullOrEmpty(nodeName))
+                return;
+
+            var treeModel = new TreeModel
+            {
+                Name = nodeName,
+                Parent_Id = 0
+            };
+            Data.SaveTreeModel(treeModel);
         }
 
         private string GetUserInput(string title)
@@ -153,8 +174,14 @@ namespace MyNotes.UserControls
             {
                 AppendNodeToTree(ref treeView, treeModel);
             }
+
+            if (result?.Count() == 0)
+            {
+                AddRootNode();
+                RefreshTree();
+            }
+
             treeView.ExpandAll();
-            
             treeView.NodeMouseClick += TreeView_NodeMouseClick;
         }
 
@@ -191,7 +218,6 @@ namespace MyNotes.UserControls
                     parent.Nodes.Add(node.Id.ToString(), node.Name);
                 }
             }
-
         }
 
         private TreeNode? FindParentNode(string parentId, TreeNode rootNode)

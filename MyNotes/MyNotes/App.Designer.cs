@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            DataAccess.UserData.UserData userData1 = new DataAccess.UserData.UserData();
             DataAccess.UserData.UserData userData2 = new DataAccess.UserData.UserData();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -86,6 +88,7 @@
             this.myEdit.AllowDrop = true;
             this.myEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.myEdit.BackColor = System.Drawing.SystemColors.Control;
+            this.myEdit.Data = userData1;
             this.myEdit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.myEdit.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.myEdit.Location = new System.Drawing.Point(0, 0);
@@ -98,6 +101,7 @@
             // 
             this.myTree.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.myTree.BackColor = System.Drawing.SystemColors.Control;
+            this.myTree.Data = userData2;
             this.myTree.Dock = System.Windows.Forms.DockStyle.Fill;
             this.myTree.ImeMode = System.Windows.Forms.ImeMode.On;
             this.myTree.Location = new System.Drawing.Point(0, 0);
@@ -131,6 +135,7 @@
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.Name = "App";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MyNotes";
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();

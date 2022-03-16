@@ -70,6 +70,7 @@
             this.Controls.Add(this.OkBtn);
             this.Controls.Add(this.textBox);
             this.Name = "GetUserInputDialog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "GetUserInputDialog";
             this.ResumeLayout(false);
             this.PerformLayout();

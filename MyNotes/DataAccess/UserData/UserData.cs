@@ -29,13 +29,44 @@ namespace DataAccess.UserData
             return _db.SaveData<TreeModel>(query, data);
         }
 
+        /// <summary>
+        /// Deleting node and all its children
+        /// in Tree and Data table
+        /// </summary>
+        /// <param name="Tree_Id"></param>
+        /// <returns></returns>
+        public void DeleteTreeNode(int Tree_Id)
+        {
+            // all tree Id to delete
+            var query = $@"WITH name_tree as 
+                        (
+	                        SELECT Id, Parent_Id, name
+	                        FROM Tree
+	                        WHERE Id = {Tree_Id}
+	                        UNION ALL
+	                        SELECT t.Id, t.Parent_Id, t.Name
+	                        FROM Tree t
+		                        JOIN name_tree p ON p.Id = t.Parent_Id
+                        )
+                        SELECT Id FROM name_tree";
 
+            _db.LoadData<int, dynamic>(query, new { Tree_Id }).ContinueWith((list) =>
+            {
+
+                var TreeIdsToDelete = string.Join(",", list.Result);
+                if (string.IsNullOrEmpty(TreeIdsToDelete) == false)
+                {
+                    _db.SaveData<int>($"DELETE FROM Tree WHERE Id IN ({TreeIdsToDelete})", new int { });
+                    _db.SaveData<int>($"DELETE FROM Data WHERE Tree_Id ({TreeIdsToDelete})", new int { });
+                }
+            });
+        }
 
 
         /*
          *  Node Related Queries
          */
-        
+
         public Task<IEnumerable<DataModel>> GetDataModel(string Tree_Id)
         {
             string query = "SELECT * FROM Data WHERE Tree_Id = @Tree_Id";
