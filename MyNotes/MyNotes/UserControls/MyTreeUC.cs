@@ -178,8 +178,8 @@ namespace MyNotes.UserControls
 
             if (result?.Count() == 0)
             {
-                AddRootNode();
-                RefreshTree();
+                //AddRootNode();
+                //RefreshTree();
             }
 
             treeView.ExpandAll();
