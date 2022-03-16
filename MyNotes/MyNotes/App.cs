@@ -1,4 +1,6 @@
 
+using DataAccess.UserData;
+
 namespace MyNotes
 {
     public partial class App : Form
@@ -20,5 +22,21 @@ namespace MyNotes
             ResumeLayout();
         }
 
+        private UserData data;
+        public UserData Data
+        {
+            get
+            {
+                if (data == null)
+                    data = new UserData();
+                return data;
+            }
+            set { data = value; }
+        }
+
+        private void vacuumDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Data.Vacuum();
+        }
     }
 }

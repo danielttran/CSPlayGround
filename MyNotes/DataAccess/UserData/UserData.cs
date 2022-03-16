@@ -25,7 +25,7 @@ namespace DataAccess.UserData
 
         public Task SaveTreeModel(TreeModel data)
         {
-            string query = @"INSERT INTO Tree (Id, Name, Parent_Id) VALUES (@Id, @Name, @Parent_Id) ON CONFLICT(Id) DO UPDATE SET Name = @Name";
+            string query = @"INSERT INTO Tree (Name, Parent_Id) VALUES (@Name, @Parent_Id) ON CONFLICT(Id) DO UPDATE SET Name = @Name";
             return _db.SaveData<TreeModel>(query, data);
         }
 

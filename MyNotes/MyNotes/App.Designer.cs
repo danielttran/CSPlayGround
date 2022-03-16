@@ -39,6 +39,7 @@
             this.myEdit = new MyNotes.UserControls.MyEditAreaUC();
             this.myTree = new MyNotes.UserControls.MyTreeUC();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
+            this.vacuumDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
@@ -73,6 +74,8 @@
             // 
             // toolsToolStripMenuItem
             // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.vacuumDatabaseToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -126,6 +129,13 @@
             this.splitContainer.SplitterDistance = 266;
             this.splitContainer.TabIndex = 2;
             // 
+            // vacuumDatabaseToolStripMenuItem
+            // 
+            this.vacuumDatabaseToolStripMenuItem.Name = "vacuumDatabaseToolStripMenuItem";
+            this.vacuumDatabaseToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.vacuumDatabaseToolStripMenuItem.Text = "Vacuum Database";
+            this.vacuumDatabaseToolStripMenuItem.Click += new System.EventHandler(this.vacuumDatabaseToolStripMenuItem_Click);
+            // 
             // App
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -158,5 +168,6 @@
         private UserControls.MyEditAreaUC myEdit;
         private UserControls.MyTreeUC myTree;
         private SplitContainer splitContainer;
+        private ToolStripMenuItem vacuumDatabaseToolStripMenuItem;
     }
 }
