@@ -183,6 +183,7 @@ namespace MyNotes.UserControls
             }
 
             treeView.ExpandAll();
+            treeView.NodeMouseClick -= TreeView_NodeMouseClick;
             treeView.NodeMouseClick += TreeView_NodeMouseClick;
         }
 

@@ -57,8 +57,8 @@ namespace DataAccess.UserData
 
             _db.LoadData<int, dynamic>(query, new { Tree_Id }).ContinueWith((list) =>
             {
-
-                var TreeIdsToDelete = string.Join(",", list.Result);
+                // Add extra item to make sure the SQL IN keyword works.
+                var TreeIdsToDelete = string.Join(",", list.Result.Append(-1));
                 if (string.IsNullOrEmpty(TreeIdsToDelete) == false)
                 {
                     _db.SaveData<int>($"DELETE FROM Tree WHERE Id IN ({TreeIdsToDelete})", new int { });
