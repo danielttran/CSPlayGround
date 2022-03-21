@@ -72,6 +72,9 @@ namespace PowerPoint
         // Tab #1 Join PPT files
         private void okBtn_Click(object sender, EventArgs e)
         {
+            if (FileList.Count == 0)
+                return;
+
             using (var ppOut = Presentation.Create())
             {
                 int i = 0;
@@ -83,6 +86,9 @@ namespace PowerPoint
                 {
                     foreach (var file in FileList)
                     {
+                        if (File.Exists(file) == false)
+                            continue;
+
                         using (var ppIn = Presentation.Open(file))
                         {
                             for (i = 0; i < ppIn.Slides.Count; i++)
