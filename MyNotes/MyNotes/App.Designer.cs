@@ -35,11 +35,12 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.vacuumDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.myEdit = new MyNotes.UserControls.MyEditAreaUC();
             this.myTree = new MyNotes.UserControls.MyTreeUC();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
-            this.vacuumDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
@@ -62,6 +63,8 @@
             // 
             // fileToolStripMenuItem
             // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.saveToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -79,6 +82,13 @@
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // vacuumDatabaseToolStripMenuItem
+            // 
+            this.vacuumDatabaseToolStripMenuItem.Name = "vacuumDatabaseToolStripMenuItem";
+            this.vacuumDatabaseToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.vacuumDatabaseToolStripMenuItem.Text = "Vacuum Database";
+            this.vacuumDatabaseToolStripMenuItem.Click += new System.EventHandler(this.vacuumDatabaseToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -129,12 +139,12 @@
             this.splitContainer.SplitterDistance = 266;
             this.splitContainer.TabIndex = 2;
             // 
-            // vacuumDatabaseToolStripMenuItem
+            // saveToolStripMenuItem
             // 
-            this.vacuumDatabaseToolStripMenuItem.Name = "vacuumDatabaseToolStripMenuItem";
-            this.vacuumDatabaseToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.vacuumDatabaseToolStripMenuItem.Text = "Vacuum Database";
-            this.vacuumDatabaseToolStripMenuItem.Click += new System.EventHandler(this.vacuumDatabaseToolStripMenuItem_Click);
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // App
             // 
@@ -169,5 +179,6 @@
         private UserControls.MyTreeUC myTree;
         private SplitContainer splitContainer;
         private ToolStripMenuItem vacuumDatabaseToolStripMenuItem;
+        private ToolStripMenuItem saveToolStripMenuItem;
     }
 }

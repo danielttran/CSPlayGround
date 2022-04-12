@@ -91,6 +91,7 @@ namespace PowerPoint
 
                         using (var ppIn = Presentation.Open(file))
                         {
+
                             for (i = 0; i < ppIn.Slides.Count; i++)
                             {
                                 if (ppIn.Slides[i] == null)
@@ -98,15 +99,21 @@ namespace PowerPoint
 
                                 ISlide slide = ppIn.Slides[i].Clone();
 
-                                ppOut.Slides.Add(slide, PasteOptions.SourceFormatting, ppIn);
+                                try
+                                {
+                                    ppOut.Slides.Add(slide, PasteOptions.SourceFormatting, ppIn);
+                                }
+                                catch
+                                {
+                                    ppOut.Slides.Add(slide);
+                                }
                             }
-                            ppIn.Close();
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-
+                    var exeption = ex.Message;
                 }
 
                 SavePPFile(ppOut);
@@ -156,7 +163,7 @@ namespace PowerPoint
             {
                 var pptContent = ppContentTb.Text;
                 var ppParagraph = pptContent.Split("\n\n\n");
-                int margin = 20;
+                int margin = 10;
 
 
                 foreach (var p in ppParagraph)
@@ -170,7 +177,7 @@ namespace PowerPoint
                     slide.Background.Fill.FillType = FillType.Solid;
                     ISolidFill fill = slide.Background.Fill.SolidFill;
 
-                    
+
                     fill.Color = ColorObject.FromArgb(tab2BackgroundColor.A,
                                                       tab2BackgroundColor.R,
                                                       tab2BackgroundColor.G,
@@ -202,7 +209,7 @@ namespace PowerPoint
             }
         }
 
-        private Color _tab2BackgroundColor;
+        private Color _tab2BackgroundColor = Color.Black;
         public Color tab2BackgroundColor
         {
             get
@@ -216,10 +223,13 @@ namespace PowerPoint
             }
         }
 
-        private Color _tab2TextColor;
+        private Color _tab2TextColor = Color.White;
         public Color tab2TextColor
         {
-            get { return _tab2TextColor; }
+            get 
+            {
+                return _tab2TextColor; 
+            }
 
             set
             {

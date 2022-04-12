@@ -38,5 +38,11 @@ namespace MyNotes
         {
             Data.Vacuum();
         }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Save current node data to database
+            
+        }
     }
 }
