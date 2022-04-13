@@ -163,7 +163,7 @@ namespace PowerPoint
             {
                 var pptContent = ppContentTb.Text;
                 var ppParagraph = pptContent.Split("\n\n\n");
-                int margin = 10;
+                int margin = 2;
 
 
                 foreach (var p in ppParagraph)
@@ -171,8 +171,8 @@ namespace PowerPoint
                     // dimension
                     ISlide slide = ppOut.Slides.Add(SlideLayoutType.Blank);
                     slide.SlideSize.Type = SlideSizeType.Custom;
-                    slide.SlideSize.Width = slide.SlideSize.Height * 16 / 9;
-
+                    slide.SlideSize.Width = slide.SlideSize.Height * 16 / 10; 
+                        
                     // color
                     slide.Background.Fill.FillType = FillType.Solid;
                     ISolidFill fill = slide.Background.Fill.SolidFill;
@@ -192,7 +192,7 @@ namespace PowerPoint
 
                     ITextPart textPart = paragraph.AddTextPart();
 
-                    textPart.Text = p;
+                    textPart.Text = p.Trim('\n');
                     textPart.Font.FontName = fontNameTb.Text;
                     if (float.TryParse(fontSizeTb.Text, out float fontSize))
                     {
