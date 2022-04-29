@@ -34,6 +34,7 @@
             this.clearBtn = new System.Windows.Forms.Button();
             this.listView = new System.Windows.Forms.ListView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.selectBackgroundColorBtn = new System.Windows.Forms.Button();
             this.selectFontColorBtn = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.fontSizeTb = new System.Windows.Forms.TextBox();
@@ -42,7 +43,8 @@
             this.clearTextBtn = new System.Windows.Forms.Button();
             this.SavePpBtn = new System.Windows.Forms.Button();
             this.ppContentTb = new System.Windows.Forms.RichTextBox();
-            this.selectBackgroundColorBtn = new System.Windows.Forms.Button();
+            this.boldFontCb = new System.Windows.Forms.CheckBox();
+            this.noSpaceAndNewLineCb = new System.Windows.Forms.CheckBox();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -109,6 +111,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.noSpaceAndNewLineCb);
+            this.tabPage2.Controls.Add(this.boldFontCb);
             this.tabPage2.Controls.Add(this.selectBackgroundColorBtn);
             this.tabPage2.Controls.Add(this.selectFontColorBtn);
             this.tabPage2.Controls.Add(this.label2);
@@ -126,9 +130,19 @@
             this.tabPage2.Text = "Create PPTX File";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // selectBackgroundColorBtn
+            // 
+            this.selectBackgroundColorBtn.Location = new System.Drawing.Point(628, 225);
+            this.selectBackgroundColorBtn.Name = "selectBackgroundColorBtn";
+            this.selectBackgroundColorBtn.Size = new System.Drawing.Size(113, 23);
+            this.selectBackgroundColorBtn.TabIndex = 12;
+            this.selectBackgroundColorBtn.Text = "Background Color";
+            this.selectBackgroundColorBtn.UseVisualStyleBackColor = true;
+            this.selectBackgroundColorBtn.Click += new System.EventHandler(this.selectBackgroundColorBtn_Click);
+            // 
             // selectFontColorBtn
             // 
-            this.selectFontColorBtn.Location = new System.Drawing.Point(628, 121);
+            this.selectFontColorBtn.Location = new System.Drawing.Point(628, 192);
             this.selectFontColorBtn.Name = "selectFontColorBtn";
             this.selectFontColorBtn.Size = new System.Drawing.Size(113, 23);
             this.selectFontColorBtn.TabIndex = 11;
@@ -139,7 +153,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(628, 70);
+            this.label2.Location = new System.Drawing.Point(628, 76);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(54, 15);
             this.label2.TabIndex = 6;
@@ -147,11 +161,11 @@
             // 
             // fontSizeTb
             // 
-            this.fontSizeTb.Location = new System.Drawing.Point(628, 92);
+            this.fontSizeTb.Location = new System.Drawing.Point(628, 101);
             this.fontSizeTb.Name = "fontSizeTb";
             this.fontSizeTb.Size = new System.Drawing.Size(156, 23);
             this.fontSizeTb.TabIndex = 5;
-            this.fontSizeTb.Text = "48";
+            this.fontSizeTb.Text = "60";
             // 
             // label1
             // 
@@ -164,7 +178,7 @@
             // 
             // fontNameTb
             // 
-            this.fontNameTb.Location = new System.Drawing.Point(628, 40);
+            this.fontNameTb.Location = new System.Drawing.Point(628, 43);
             this.fontNameTb.Name = "fontNameTb";
             this.fontNameTb.Size = new System.Drawing.Size(156, 23);
             this.fontNameTb.TabIndex = 3;
@@ -201,15 +215,25 @@
             this.ppContentTb.TabIndex = 0;
             this.ppContentTb.Text = "";
             // 
-            // selectBackgroundColorBtn
+            // boldFontCb
             // 
-            this.selectBackgroundColorBtn.Location = new System.Drawing.Point(628, 150);
-            this.selectBackgroundColorBtn.Name = "selectBackgroundColorBtn";
-            this.selectBackgroundColorBtn.Size = new System.Drawing.Size(113, 23);
-            this.selectBackgroundColorBtn.TabIndex = 12;
-            this.selectBackgroundColorBtn.Text = "Background Color";
-            this.selectBackgroundColorBtn.UseVisualStyleBackColor = true;
-            this.selectBackgroundColorBtn.Click += new System.EventHandler(this.selectBackgroundColorBtn_Click);
+            this.boldFontCb.AutoSize = true;
+            this.boldFontCb.Location = new System.Drawing.Point(628, 134);
+            this.boldFontCb.Name = "boldFontCb";
+            this.boldFontCb.Size = new System.Drawing.Size(77, 19);
+            this.boldFontCb.TabIndex = 13;
+            this.boldFontCb.Text = "Bold Font";
+            this.boldFontCb.UseVisualStyleBackColor = true;
+            // 
+            // noSpaceAndNewLineCbx
+            // 
+            this.noSpaceAndNewLineCb.AutoSize = true;
+            this.noSpaceAndNewLineCb.Location = new System.Drawing.Point(628, 163);
+            this.noSpaceAndNewLineCb.Name = "noSpaceAndNewLineCbx";
+            this.noSpaceAndNewLineCb.Size = new System.Drawing.Size(146, 19);
+            this.noSpaceAndNewLineCb.TabIndex = 14;
+            this.noSpaceAndNewLineCb.Text = "Remove Spaces, Enters";
+            this.noSpaceAndNewLineCb.UseVisualStyleBackColor = true;
             // 
             // PowerPointHelperForm
             // 
@@ -244,5 +268,7 @@
         private TextBox fontNameTb;
         private Button selectFontColorBtn;
         private Button selectBackgroundColorBtn;
+        private CheckBox noSpaceAndNewLineCb;
+        private CheckBox boldFontCb;
     }
 }

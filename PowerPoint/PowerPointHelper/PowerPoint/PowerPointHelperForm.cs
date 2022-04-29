@@ -164,15 +164,16 @@ namespace PowerPoint
                 var pptContent = ppContentTb.Text;
                 var ppParagraph = pptContent.Split("\n\n\n");
                 int margin = 2;
-
+                bool BoldALlText = boldFontCb.Checked;
+                bool RemoveAllSpace = noSpaceAndNewLineCb.Checked;
 
                 foreach (var p in ppParagraph)
                 {
                     // dimension
                     ISlide slide = ppOut.Slides.Add(SlideLayoutType.Blank);
                     slide.SlideSize.Type = SlideSizeType.Custom;
-                    slide.SlideSize.Width = slide.SlideSize.Height * 16 / 10; 
-                        
+                    slide.SlideSize.Width = slide.SlideSize.Height * 16 / 10;
+
                     // color
                     slide.Background.Fill.FillType = FillType.Solid;
                     ISolidFill fill = slide.Background.Fill.SolidFill;
@@ -191,13 +192,28 @@ namespace PowerPoint
                     IParagraph paragraph = textbox.TextBody.AddParagraph();
 
                     ITextPart textPart = paragraph.AddTextPart();
+                    var text = p.Trim('\n');
+                    if (RemoveAllSpace)
+                    {
+                        text = text.Replace("\n", " ");
 
-                    textPart.Text = p.Trim('\n');
+                        // run a few times to remove all space.
+                        // why loop to waste time?
+                        text = text.Replace("  ", " ");
+                        text = text.Replace("  ", " ");
+                        text = text.Replace("  ", " ");
+                        text = text.Replace("  ", " ");
+                    }
+
+                    textPart.Text = text;
                     textPart.Font.FontName = fontNameTb.Text;
                     if (float.TryParse(fontSizeTb.Text, out float fontSize))
                     {
                         textPart.Font.FontSize = fontSize;
                     }
+
+                    textPart.Font.Bold = BoldALlText;
+
                     IFont font = textPart.Font;
                     font.Color = ColorObject.FromArgb(tab2TextColor.A,
                                                       tab2TextColor.R,
@@ -226,9 +242,9 @@ namespace PowerPoint
         private Color _tab2TextColor = Color.White;
         public Color tab2TextColor
         {
-            get 
+            get
             {
-                return _tab2TextColor; 
+                return _tab2TextColor;
             }
 
             set
