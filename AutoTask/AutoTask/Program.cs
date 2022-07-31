@@ -32,12 +32,20 @@ namespace AutoTask
             // on the weekend.
             List<string> ProcessesToShutdown = new List<string> { "Teams" };
 
+            List<DayOfWeek> DaysToShutdown = new List<DayOfWeek>
+            {
+                DayOfWeek.Saturday,
+                DayOfWeek.Sunday,
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Thursday
+            };
+
             HideWindow();
             int seconds = 0;
             while (true)
             {
-
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday)
+                foreach (var dayToShutdown in DaysToShutdown)
                 {
                     foreach (var processName in ProcessesToShutdown)
                     {
