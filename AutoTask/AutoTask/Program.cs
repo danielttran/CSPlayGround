@@ -47,14 +47,17 @@ namespace AutoTask
             {
                 foreach (var dayToShutdown in DaysToShutdown)
                 {
-                    foreach (var processName in ProcessesToShutdown)
+                    if (DateTime.Now.DayOfWeek == dayToShutdown)
                     {
-                        ShutdownProcessByName(processName);
+                        foreach (var processName in ProcessesToShutdown)
+                        {
+                            ShutdownProcessByName(processName);
+                        }
                     }
                 }
 
                 System.Threading.Thread.Sleep(5000);
-                if (seconds++ / 60 > 1) // only run for 1 mins
+                if (seconds++ / 60 > 5) // only run for 1 mins
                 {
                     break;
                 }
