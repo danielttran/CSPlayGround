@@ -30,10 +30,14 @@
         {
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.MoveDownBtn = new System.Windows.Forms.Button();
+            this.MoveUpBtn = new System.Windows.Forms.Button();
             this.okBtn = new System.Windows.Forms.Button();
             this.clearBtn = new System.Windows.Forms.Button();
             this.listView = new System.Windows.Forms.ListView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.noSpaceAndNewLineCb = new System.Windows.Forms.CheckBox();
+            this.boldFontCb = new System.Windows.Forms.CheckBox();
             this.selectBackgroundColorBtn = new System.Windows.Forms.Button();
             this.selectFontColorBtn = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -43,8 +47,7 @@
             this.clearTextBtn = new System.Windows.Forms.Button();
             this.SavePpBtn = new System.Windows.Forms.Button();
             this.ppContentTb = new System.Windows.Forms.RichTextBox();
-            this.boldFontCb = new System.Windows.Forms.CheckBox();
-            this.noSpaceAndNewLineCb = new System.Windows.Forms.CheckBox();
+            this.RemoveSelectedBtn = new System.Windows.Forms.Button();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -64,6 +67,9 @@
             // tabPage1
             // 
             this.tabPage1.AllowDrop = true;
+            this.tabPage1.Controls.Add(this.RemoveSelectedBtn);
+            this.tabPage1.Controls.Add(this.MoveDownBtn);
+            this.tabPage1.Controls.Add(this.MoveUpBtn);
             this.tabPage1.Controls.Add(this.okBtn);
             this.tabPage1.Controls.Add(this.clearBtn);
             this.tabPage1.Controls.Add(this.listView);
@@ -74,6 +80,26 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Join PPTX Files";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // MoveDownBtn
+            // 
+            this.MoveDownBtn.Location = new System.Drawing.Point(709, 350);
+            this.MoveDownBtn.Name = "MoveDownBtn";
+            this.MoveDownBtn.Size = new System.Drawing.Size(75, 23);
+            this.MoveDownBtn.TabIndex = 4;
+            this.MoveDownBtn.Text = "Down";
+            this.MoveDownBtn.UseVisualStyleBackColor = true;
+            this.MoveDownBtn.Click += new System.EventHandler(this.MoveDownBtn_Click);
+            // 
+            // MoveUpBtn
+            // 
+            this.MoveUpBtn.Location = new System.Drawing.Point(628, 350);
+            this.MoveUpBtn.Name = "MoveUpBtn";
+            this.MoveUpBtn.Size = new System.Drawing.Size(75, 23);
+            this.MoveUpBtn.TabIndex = 3;
+            this.MoveUpBtn.Text = "Up";
+            this.MoveUpBtn.UseVisualStyleBackColor = true;
+            this.MoveUpBtn.Click += new System.EventHandler(this.MoveUpBtn_Click);
             // 
             // okBtn
             // 
@@ -106,6 +132,7 @@
             this.listView.TabIndex = 0;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.List;
+            this.listView.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView_ItemSelectionChanged);
             this.listView.DragDrop += new System.Windows.Forms.DragEventHandler(this.listView_DragDrop);
             this.listView.DragOver += new System.Windows.Forms.DragEventHandler(this.listView_DragOver);
             // 
@@ -129,6 +156,26 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Create PPTX File";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // noSpaceAndNewLineCb
+            // 
+            this.noSpaceAndNewLineCb.AutoSize = true;
+            this.noSpaceAndNewLineCb.Location = new System.Drawing.Point(628, 163);
+            this.noSpaceAndNewLineCb.Name = "noSpaceAndNewLineCb";
+            this.noSpaceAndNewLineCb.Size = new System.Drawing.Size(146, 19);
+            this.noSpaceAndNewLineCb.TabIndex = 14;
+            this.noSpaceAndNewLineCb.Text = "Remove Spaces, Enters";
+            this.noSpaceAndNewLineCb.UseVisualStyleBackColor = true;
+            // 
+            // boldFontCb
+            // 
+            this.boldFontCb.AutoSize = true;
+            this.boldFontCb.Location = new System.Drawing.Point(628, 134);
+            this.boldFontCb.Name = "boldFontCb";
+            this.boldFontCb.Size = new System.Drawing.Size(77, 19);
+            this.boldFontCb.TabIndex = 13;
+            this.boldFontCb.Text = "Bold Font";
+            this.boldFontCb.UseVisualStyleBackColor = true;
             // 
             // selectBackgroundColorBtn
             // 
@@ -215,25 +262,15 @@
             this.ppContentTb.TabIndex = 0;
             this.ppContentTb.Text = "";
             // 
-            // boldFontCb
+            // RemoveSelectedBtn
             // 
-            this.boldFontCb.AutoSize = true;
-            this.boldFontCb.Location = new System.Drawing.Point(628, 134);
-            this.boldFontCb.Name = "boldFontCb";
-            this.boldFontCb.Size = new System.Drawing.Size(77, 19);
-            this.boldFontCb.TabIndex = 13;
-            this.boldFontCb.Text = "Bold Font";
-            this.boldFontCb.UseVisualStyleBackColor = true;
-            // 
-            // noSpaceAndNewLineCbx
-            // 
-            this.noSpaceAndNewLineCb.AutoSize = true;
-            this.noSpaceAndNewLineCb.Location = new System.Drawing.Point(628, 163);
-            this.noSpaceAndNewLineCb.Name = "noSpaceAndNewLineCbx";
-            this.noSpaceAndNewLineCb.Size = new System.Drawing.Size(146, 19);
-            this.noSpaceAndNewLineCb.TabIndex = 14;
-            this.noSpaceAndNewLineCb.Text = "Remove Spaces, Enters";
-            this.noSpaceAndNewLineCb.UseVisualStyleBackColor = true;
+            this.RemoveSelectedBtn.Location = new System.Drawing.Point(708, 314);
+            this.RemoveSelectedBtn.Name = "RemoveSelectedBtn";
+            this.RemoveSelectedBtn.Size = new System.Drawing.Size(75, 23);
+            this.RemoveSelectedBtn.TabIndex = 5;
+            this.RemoveSelectedBtn.Text = "Remove";
+            this.RemoveSelectedBtn.UseVisualStyleBackColor = true;
+            this.RemoveSelectedBtn.Click += new System.EventHandler(this.RemoveSelectedBtn_Click);
             // 
             // PowerPointHelperForm
             // 
@@ -270,5 +307,8 @@
         private Button selectBackgroundColorBtn;
         private CheckBox noSpaceAndNewLineCb;
         private CheckBox boldFontCb;
+        private Button MoveDownBtn;
+        private Button MoveUpBtn;
+        private Button RemoveSelectedBtn;
     }
 }

@@ -150,6 +150,55 @@ namespace PowerPoint
             return saveFileDialog1.FileName;
         }
 
+        string currentSelection = "";
+
+        private void MoveUpBtn_Click(object sender, EventArgs e)
+        {
+            if(string.IsNullOrEmpty(currentSelection) == false)
+            {
+                var index = FileList.IndexOf(currentSelection);
+                if(index > 0 )
+                {
+                    var temp = FileList[index - 1];
+                    FileList[index] = temp;
+                    FileList[index - 1] = currentSelection;
+                }
+            }
+
+            RefreshList();
+        }
+
+        private void MoveDownBtn_Click(object sender, EventArgs e)
+        {
+            if(string.IsNullOrEmpty(currentSelection) == false)
+            {
+                var index = FileList.IndexOf(currentSelection);
+                if(index < FileList.Count - 1)
+                {
+                    var temp = FileList[index + 1];
+                    FileList[index] = temp;
+                    FileList[index + 1] = currentSelection;
+                }
+            }
+
+            RefreshList();
+        }
+
+        private void RemoveSelectedBtn_Click(object sender, EventArgs e)
+        {
+            if(string.IsNullOrEmpty(currentSelection) == false)
+            {
+                FileList.Remove(currentSelection);
+                RefreshList();
+            }
+        }
+
+        private void listView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            currentSelection = e.Item.Text;
+        }
+
+//*********************************************************************************************************************************************************
 
         // Tab #2 Create PPT file
         private void clearTextBtn_Click(object sender, EventArgs e)
@@ -275,5 +324,7 @@ namespace PowerPoint
 
             ppContentTb.BackColor = tab2BackgroundColor;
         }
+
+
     }
 }
