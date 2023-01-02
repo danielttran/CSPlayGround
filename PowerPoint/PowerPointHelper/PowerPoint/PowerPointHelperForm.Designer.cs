@@ -30,6 +30,7 @@
         {
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.RemoveSelectedBtn = new System.Windows.Forms.Button();
             this.MoveDownBtn = new System.Windows.Forms.Button();
             this.MoveUpBtn = new System.Windows.Forms.Button();
             this.okBtn = new System.Windows.Forms.Button();
@@ -47,7 +48,6 @@
             this.clearTextBtn = new System.Windows.Forms.Button();
             this.SavePpBtn = new System.Windows.Forms.Button();
             this.ppContentTb = new System.Windows.Forms.RichTextBox();
-            this.RemoveSelectedBtn = new System.Windows.Forms.Button();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -55,13 +55,13 @@
             // 
             // tabControl
             // 
-            this.tabControl.Controls.Add(this.tabPage1);
             this.tabControl.Controls.Add(this.tabPage2);
+            this.tabControl.Controls.Add(this.tabPage1);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(800, 450);
+            this.tabControl.Size = new System.Drawing.Size(1044, 856);
             this.tabControl.TabIndex = 0;
             // 
             // tabPage1
@@ -76,34 +76,45 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 24);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(792, 422);
+            this.tabPage1.Size = new System.Drawing.Size(1036, 828);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Join PPTX Files";
+            this.tabPage1.Text = "Join Power Point Files";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // RemoveSelectedBtn
+            // 
+            this.RemoveSelectedBtn.Location = new System.Drawing.Point(955, 320);
+            this.RemoveSelectedBtn.Name = "RemoveSelectedBtn";
+            this.RemoveSelectedBtn.Size = new System.Drawing.Size(75, 61);
+            this.RemoveSelectedBtn.TabIndex = 5;
+            this.RemoveSelectedBtn.Text = "Remove";
+            this.RemoveSelectedBtn.UseVisualStyleBackColor = true;
+            this.RemoveSelectedBtn.Click += new System.EventHandler(this.RemoveSelectedBtn_Click);
             // 
             // MoveDownBtn
             // 
-            this.MoveDownBtn.Location = new System.Drawing.Point(709, 350);
+            this.MoveDownBtn.Location = new System.Drawing.Point(872, 358);
             this.MoveDownBtn.Name = "MoveDownBtn";
             this.MoveDownBtn.Size = new System.Drawing.Size(75, 23);
             this.MoveDownBtn.TabIndex = 4;
-            this.MoveDownBtn.Text = "Down";
+            this.MoveDownBtn.Text = "Down 🔽";
             this.MoveDownBtn.UseVisualStyleBackColor = true;
             this.MoveDownBtn.Click += new System.EventHandler(this.MoveDownBtn_Click);
             // 
             // MoveUpBtn
             // 
-            this.MoveUpBtn.Location = new System.Drawing.Point(628, 350);
+            this.MoveUpBtn.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.MoveUpBtn.Location = new System.Drawing.Point(874, 320);
             this.MoveUpBtn.Name = "MoveUpBtn";
             this.MoveUpBtn.Size = new System.Drawing.Size(75, 23);
             this.MoveUpBtn.TabIndex = 3;
-            this.MoveUpBtn.Text = "Up";
+            this.MoveUpBtn.Text = "Up 🔼";
             this.MoveUpBtn.UseVisualStyleBackColor = true;
             this.MoveUpBtn.Click += new System.EventHandler(this.MoveUpBtn_Click);
             // 
             // okBtn
             // 
-            this.okBtn.Location = new System.Drawing.Point(709, 391);
+            this.okBtn.Location = new System.Drawing.Point(955, 799);
             this.okBtn.Name = "okBtn";
             this.okBtn.Size = new System.Drawing.Size(75, 23);
             this.okBtn.TabIndex = 2;
@@ -113,7 +124,7 @@
             // 
             // clearBtn
             // 
-            this.clearBtn.Location = new System.Drawing.Point(628, 391);
+            this.clearBtn.Location = new System.Drawing.Point(874, 799);
             this.clearBtn.Name = "clearBtn";
             this.clearBtn.Size = new System.Drawing.Size(75, 23);
             this.clearBtn.TabIndex = 1;
@@ -128,7 +139,7 @@
             this.listView.Dock = System.Windows.Forms.DockStyle.Left;
             this.listView.Location = new System.Drawing.Point(3, 3);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(619, 416);
+            this.listView.Size = new System.Drawing.Size(863, 822);
             this.listView.TabIndex = 0;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.List;
@@ -152,15 +163,15 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 24);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(792, 422);
+            this.tabPage2.Size = new System.Drawing.Size(1036, 828);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Create PPTX File";
+            this.tabPage2.Text = "Create Power Point";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // noSpaceAndNewLineCb
             // 
             this.noSpaceAndNewLineCb.AutoSize = true;
-            this.noSpaceAndNewLineCb.Location = new System.Drawing.Point(628, 163);
+            this.noSpaceAndNewLineCb.Location = new System.Drawing.Point(872, 151);
             this.noSpaceAndNewLineCb.Name = "noSpaceAndNewLineCb";
             this.noSpaceAndNewLineCb.Size = new System.Drawing.Size(146, 19);
             this.noSpaceAndNewLineCb.TabIndex = 14;
@@ -170,7 +181,7 @@
             // boldFontCb
             // 
             this.boldFontCb.AutoSize = true;
-            this.boldFontCb.Location = new System.Drawing.Point(628, 134);
+            this.boldFontCb.Location = new System.Drawing.Point(872, 122);
             this.boldFontCb.Name = "boldFontCb";
             this.boldFontCb.Size = new System.Drawing.Size(77, 19);
             this.boldFontCb.TabIndex = 13;
@@ -179,7 +190,7 @@
             // 
             // selectBackgroundColorBtn
             // 
-            this.selectBackgroundColorBtn.Location = new System.Drawing.Point(628, 225);
+            this.selectBackgroundColorBtn.Location = new System.Drawing.Point(872, 213);
             this.selectBackgroundColorBtn.Name = "selectBackgroundColorBtn";
             this.selectBackgroundColorBtn.Size = new System.Drawing.Size(113, 23);
             this.selectBackgroundColorBtn.TabIndex = 12;
@@ -189,7 +200,7 @@
             // 
             // selectFontColorBtn
             // 
-            this.selectFontColorBtn.Location = new System.Drawing.Point(628, 192);
+            this.selectFontColorBtn.Location = new System.Drawing.Point(872, 180);
             this.selectFontColorBtn.Name = "selectFontColorBtn";
             this.selectFontColorBtn.Size = new System.Drawing.Size(113, 23);
             this.selectFontColorBtn.TabIndex = 11;
@@ -200,7 +211,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(628, 76);
+            this.label2.Location = new System.Drawing.Point(872, 64);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(54, 15);
             this.label2.TabIndex = 6;
@@ -208,7 +219,7 @@
             // 
             // fontSizeTb
             // 
-            this.fontSizeTb.Location = new System.Drawing.Point(628, 101);
+            this.fontSizeTb.Location = new System.Drawing.Point(872, 89);
             this.fontSizeTb.Name = "fontSizeTb";
             this.fontSizeTb.Size = new System.Drawing.Size(156, 23);
             this.fontSizeTb.TabIndex = 5;
@@ -217,7 +228,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(628, 18);
+            this.label1.Location = new System.Drawing.Point(872, 6);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(64, 15);
             this.label1.TabIndex = 4;
@@ -225,7 +236,7 @@
             // 
             // fontNameTb
             // 
-            this.fontNameTb.Location = new System.Drawing.Point(628, 43);
+            this.fontNameTb.Location = new System.Drawing.Point(872, 31);
             this.fontNameTb.Name = "fontNameTb";
             this.fontNameTb.Size = new System.Drawing.Size(156, 23);
             this.fontNameTb.TabIndex = 3;
@@ -233,7 +244,7 @@
             // 
             // clearTextBtn
             // 
-            this.clearTextBtn.Location = new System.Drawing.Point(628, 391);
+            this.clearTextBtn.Location = new System.Drawing.Point(874, 797);
             this.clearTextBtn.Name = "clearTextBtn";
             this.clearTextBtn.Size = new System.Drawing.Size(75, 23);
             this.clearTextBtn.TabIndex = 2;
@@ -243,7 +254,7 @@
             // 
             // SavePpBtn
             // 
-            this.SavePpBtn.Location = new System.Drawing.Point(709, 391);
+            this.SavePpBtn.Location = new System.Drawing.Point(955, 797);
             this.SavePpBtn.Name = "SavePpBtn";
             this.SavePpBtn.Size = new System.Drawing.Size(75, 23);
             this.SavePpBtn.TabIndex = 1;
@@ -258,26 +269,18 @@
             this.ppContentTb.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ppContentTb.Location = new System.Drawing.Point(3, 3);
             this.ppContentTb.Name = "ppContentTb";
-            this.ppContentTb.Size = new System.Drawing.Size(619, 416);
+            this.ppContentTb.Size = new System.Drawing.Size(863, 822);
             this.ppContentTb.TabIndex = 0;
             this.ppContentTb.Text = "";
-            // 
-            // RemoveSelectedBtn
-            // 
-            this.RemoveSelectedBtn.Location = new System.Drawing.Point(708, 314);
-            this.RemoveSelectedBtn.Name = "RemoveSelectedBtn";
-            this.RemoveSelectedBtn.Size = new System.Drawing.Size(75, 23);
-            this.RemoveSelectedBtn.TabIndex = 5;
-            this.RemoveSelectedBtn.Text = "Remove";
-            this.RemoveSelectedBtn.UseVisualStyleBackColor = true;
-            this.RemoveSelectedBtn.Click += new System.EventHandler(this.RemoveSelectedBtn_Click);
             // 
             // PowerPointHelperForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1044, 856);
             this.Controls.Add(this.tabControl);
+            this.MaximumSize = new System.Drawing.Size(1060, 895);
+            this.MinimumSize = new System.Drawing.Size(1060, 895);
             this.Name = "PowerPointHelperForm";
             this.Text = "Power Point Helper";
             this.tabControl.ResumeLayout(false);
