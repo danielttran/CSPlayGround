@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Syncfusion.Core.WinForms" Version="20.4.0.41" />
-    <PackageReference Include="Syncfusion.Licensing" Version="20.4.0.41" />
-    <PackageReference Include="Syncfusion.Presentation.Net.Core" Version="20.4.0.41" />
+    <PackageReference Include="Syncfusion.Core.WinForms" Version="20.4.0.44" />
+    <PackageReference Include="Syncfusion.Licensing" Version="20.4.0.44" />
+    <PackageReference Include="Syncfusion.Presentation.Net.Core" Version="20.4.0.44" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,3 +1,4 @@
+using Microsoft.VisualBasic.Logging;
 using Syncfusion;
 using Syncfusion.Presentation;
 using System.Diagnostics;
@@ -14,6 +15,24 @@ namespace PowerPoint
         {
             InitializeComponent();
             this.Text = title;
+
+            // recover if any
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\PPHelper.txt";
+            if (File.Exists(path))
+            {
+                var content = File.ReadAllText(path);
+                if (string.IsNullOrEmpty(content) == false)
+                {
+                    foreach (var fileName in content.Split('\n'))
+                    {
+                        if (string.IsNullOrEmpty(fileName) == false)
+                        {
+                            FileList.Add(fileName.Trim('\r'));
+                        }
+                    }
+                    RefreshList();
+                }
+            }
         }
 
 
@@ -47,7 +66,10 @@ namespace PowerPoint
 
                 foreach (var file in files)
                 {
-                    FileList.Add(file);
+                    if (string.IsNullOrEmpty(file) == false)
+                    {
+                        FileList.Add(file);
+                    }
                 }
 
                 RefreshList();
@@ -62,10 +84,13 @@ namespace PowerPoint
                 listView.Items.Add(file);
             }
 
-            if(string.IsNullOrEmpty(currentSelection) == false)
+            if (string.IsNullOrEmpty(currentSelection) == false)
             {
                 var item = listView.FindItemWithText(currentSelection);
-                listView.Items[item.Index].Selected = true;
+                if (listView.Items.Count > 0 && item != null)
+                {
+                    listView.Items[item.Index].Selected = true;
+                }
             }
         }
 
@@ -97,7 +122,7 @@ namespace PowerPoint
 
                         using (var ppIn = Presentation.Open(file))
                         {
-
+                            bool addKeepSource = true;
                             for (i = 0; i < ppIn.Slides.Count; i++)
                             {
                                 if (ppIn.Slides[i] == null)
@@ -107,10 +132,18 @@ namespace PowerPoint
 
                                 try
                                 {
-                                    ppOut.Slides.Add(slide, PasteOptions.SourceFormatting, ppIn);
+                                    if (addKeepSource == true)
+                                    {
+                                        ppOut.Slides.Add(slide, PasteOptions.SourceFormatting, ppIn);
+                                    }
+                                    else
+                                    {
+                                        ppOut.Slides.Add(slide);
+                                    }
                                 }
                                 catch
                                 {
+                                    addKeepSource = false;
                                     ppOut.Slides.Add(slide);
                                 }
                             }
@@ -126,22 +159,36 @@ namespace PowerPoint
             }
         }
 
-        private static void SavePPFile(IPresentation ppOut)
+        private void SavePPFile(IPresentation ppOut)
         {
-            var FilePath = GetSaveFilePath();
-            if (string.IsNullOrEmpty(FilePath) == false)
+            try
             {
-                ppOut.Save(FilePath);
-                ppOut.Close();
-                // open
-                new Process
+                var FilePath = GetSaveFilePath();
+                if (string.IsNullOrEmpty(FilePath) == false)
                 {
-                    StartInfo = new ProcessStartInfo(FilePath)
+                    ppOut.Save(FilePath);
+                    ppOut.Close();
+                    // open
+                    new Process
                     {
-                        UseShellExecute = true
-                    }
-                }.Start();
-
+                        StartInfo = new ProcessStartInfo(FilePath)
+                        {
+                            UseShellExecute = true
+                        }
+                    }.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                var err = ex.ToString();
+            }
+            finally
+            {
+                // also save the filelist to a tempt location in case of crash
+                // we can recover from, like notepad++
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\PPHelper.txt";
+                File.WriteAllText(path, string.Empty);
+                File.WriteAllText(path, string.Join(Environment.NewLine, FileList));
             }
         }
 
@@ -160,10 +207,10 @@ namespace PowerPoint
 
         private void MoveUpBtn_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(currentSelection) == false)
+            if (string.IsNullOrEmpty(currentSelection) == false)
             {
                 var index = FileList.IndexOf(currentSelection);
-                if(index > 0 )
+                if (index > 0)
                 {
                     var temp = FileList[index - 1];
                     FileList[index] = temp;
@@ -176,10 +223,10 @@ namespace PowerPoint
 
         private void MoveDownBtn_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(currentSelection) == false)
+            if (string.IsNullOrEmpty(currentSelection) == false)
             {
                 var index = FileList.IndexOf(currentSelection);
-                if(index < FileList.Count - 1)
+                if (index < FileList.Count - 1)
                 {
                     var temp = FileList[index + 1];
                     FileList[index] = temp;
@@ -192,7 +239,7 @@ namespace PowerPoint
 
         private void RemoveSelectedBtn_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(currentSelection) == false)
+            if (string.IsNullOrEmpty(currentSelection) == false)
             {
                 FileList.Remove(currentSelection);
                 RefreshList();
@@ -204,7 +251,7 @@ namespace PowerPoint
             currentSelection = e.Item.Text;
         }
 
-//*********************************************************************************************************************************************************
+        //*********************************************************************************************************************************************************
 
         // Tab #2 Create PPT file
         private void clearTextBtn_Click(object sender, EventArgs e)
