@@ -1,12 +1,13 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 namespace GrantHornerReading
 {
     public class GrantHornerSystem
     {
-        private List<List<string>> lists;
+        public List<List<string>> lists;
         private Dictionary<string, int> rowCount;
-
+        
         public GrantHornerSystem(int chaptersPerDay)
         {
 
@@ -1367,6 +1368,13 @@ namespace GrantHornerReading
 
                 }
 
+                string positionToSearch = "Luk 14, Lev 7";//, 1Cor 3";//, Rev 4, Job 35, Psa 135, Pro 6, 1Sam 9, Isa 46, Rom 9";
+                string pos2 = "Mat 7, Gen 7, Rom 7, 2The 2, Job 7, Psa 7, Pro 7, Jos 7, Isa 7, Act 7";
+                if (row.Contains(positionToSearch))
+                {
+
+                }
+
                 if (rowCount.ContainsKey(row))
                 {
                     rowCount[row]++;
@@ -1380,8 +1388,11 @@ namespace GrantHornerReading
                 row = string.Empty;
             }
 
+            var tempFile = Path.GetTempFileName();
+            File.WriteAllText(tempFile, stringBuilder.ToString());
+            Process.Start("notepad.exe", tempFile);
 
-            File.WriteAllText(@"C:\tmp\plan.csv", stringBuilder.ToString()); // print here
+            //File.WriteAllText(@"C:\tmp\plan.csv", stringBuilder.ToString()); // print here
         }
     }
 }
