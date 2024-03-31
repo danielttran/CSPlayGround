@@ -18,15 +18,22 @@ namespace PowerPoint
         private static string RegisterApp()
         {
             var key = File.ReadAllText("key.txt").Trim();
+
+            string licenseMessage = "";
+
             if (string.IsNullOrEmpty(key) == false)
             {
                 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(key);
-                return "Power Point Helper is licensed";
+                if(Syncfusion.Licensing.SyncfusionLicenseProvider.ValidateLicense(Syncfusion.Licensing.Platform.ASPNETCore, out licenseMessage) == true )
+                {
+                    licenseMessage = "Licensed";
+                }
+                else
+                {
+                    licenseMessage += " Once you have a community license, please put it in key.txt";
+                }
             }
-            else
-            {
-                return "Power Point Helper is Unlicensed";
-            }
+            return licenseMessage;
         }
     }
 }
