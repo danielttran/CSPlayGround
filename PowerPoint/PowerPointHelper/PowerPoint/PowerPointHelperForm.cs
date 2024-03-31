@@ -2,6 +2,7 @@ using Microsoft.VisualBasic.Logging;
 using Syncfusion;
 using Syncfusion.Presentation;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace PowerPoint
 {
@@ -266,7 +267,7 @@ namespace PowerPoint
                 var pptContent = ppContentTb.Text;
                 var ppParagraph = pptContent.Split("\n\n\n");
                 int margin = 2;
-                bool BoldALlText = boldFontCb.Checked;
+                bool BoldAllText = boldFontCb.Checked;
                 bool RemoveAllSpace = noSpaceAndNewLineCb.Checked;
 
                 foreach (var p in ppParagraph)
@@ -298,13 +299,7 @@ namespace PowerPoint
                     if (RemoveAllSpace)
                     {
                         text = text.Replace("\n", " ");
-
-                        // run a few times to remove all space.
-                        // why loop to waste time?
-                        text = text.Replace("  ", " ");
-                        text = text.Replace("  ", " ");
-                        text = text.Replace("  ", " ");
-                        text = text.Replace("  ", " ");
+                        text = Regex.Replace(text, @"\s+", " ");
                     }
 
                     textPart.Text = text;
@@ -314,7 +309,7 @@ namespace PowerPoint
                         textPart.Font.FontSize = fontSize;
                     }
 
-                    textPart.Font.Bold = BoldALlText;
+                    textPart.Font.Bold = BoldAllText;
 
                     IFont font = textPart.Font;
                     font.Color = ColorObject.FromArgb(tab2TextColor.A,
