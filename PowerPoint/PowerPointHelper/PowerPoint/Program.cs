@@ -24,7 +24,7 @@ namespace PowerPoint
             if (string.IsNullOrEmpty(key) == false)
             {
                 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(key);
-                if(Syncfusion.Licensing.SyncfusionLicenseProvider.ValidateLicense(Syncfusion.Licensing.Platform.ASPNETCore, out licenseMessage) == true )
+                if(Syncfusion.Licensing.SyncfusionLicenseProvider.ValidateLicense(Syncfusion.Licensing.Platform.WindowsForms, out licenseMessage) == true )
                 {
                     licenseMessage = "Licensed";
                 }

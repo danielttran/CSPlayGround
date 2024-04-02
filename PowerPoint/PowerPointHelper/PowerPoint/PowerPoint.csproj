@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Syncfusion.Licensing" Version="25.1.37" />
-    <PackageReference Include="Syncfusion.Presentation.Net.Core" Version="25.1.37" />
+    <PackageReference Include="Syncfusion.Licensing" Version="25.1.38" />
+    <PackageReference Include="Syncfusion.Presentation.Net.Core" Version="25.1.38" />
   </ItemGroup>
 
   <ItemGroup>
