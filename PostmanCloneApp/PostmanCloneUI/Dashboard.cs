@@ -1,7 +1,10 @@
+using PostmanCloneLibrary;
+
 namespace PostmanCloneUI;
 
 public partial class Dashboard : Form
 {
+    private readonly IApiAccess api = new ApiAccess();
     public Dashboard()
     {
         InitializeComponent();
@@ -9,13 +12,18 @@ public partial class Dashboard : Form
 
     private async void callAPI_Click(object sender, EventArgs e)
     {
+        systemStatus.Text = "Calling API...";
+        resultsText.Text = string.Empty;
+
+        if (api.IsValidUrl(apiText.Text) == false)
+        {
+            systemStatus.Text = "Invalid URL";
+            return;
+        }
+
         try
         {
-            systemStatus.Text = "Calling API...";
-            
-            // sample, replace with actual API call
-            await Task.Delay(2000);
-
+            resultsText.Text = await api.CallApiAsync(apiText.Text);
             systemStatus.Text = "Ready";
         }
         catch (Exception ex)
