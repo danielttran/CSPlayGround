@@ -6,14 +6,22 @@ public class ApiAccess : IApiAccess
 {
     private readonly HttpClient client = new();
     public async Task<string> CallApiAsync(string url,
+                                           HttpContent content = null,
                                            bool formatOutput = true,
                                            HttpAction action = HttpAction.GET)
     {
-        using var response = await client.GetAsync(url);
-
-        if (response.IsSuccessStatusCode)
+        HttpResponseMessage responseMessage = action switch
         {
-            string json = await response.Content.ReadAsStringAsync();
+            HttpAction.GET => await client.GetAsync(url),
+            HttpAction.POST => await client.PostAsync(url, content),
+            HttpAction.PUT => await client.PutAsync(url, content),
+            HttpAction.DELETE => await client.DeleteAsync(url),
+            _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
+        };
+
+        if (responseMessage.IsSuccessStatusCode)
+        {
+            string json = await responseMessage.Content.ReadAsStringAsync();
 
             if (formatOutput)
             {
@@ -25,7 +33,7 @@ public class ApiAccess : IApiAccess
         }
         else
         {
-            throw new HttpRequestException($"Error: {response.StatusCode}");
+            throw new HttpRequestException($"Error: {responseMessage.StatusCode}");
         }
     }
 

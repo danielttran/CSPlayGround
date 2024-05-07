@@ -52,7 +52,7 @@
             // apiLabel
             // 
             apiLabel.AutoSize = true;
-            apiLabel.Location = new Point(41, 68);
+            apiLabel.Location = new Point(41, 71);
             apiLabel.Name = "apiLabel";
             apiLabel.Size = new Size(44, 25);
             apiLabel.TabIndex = 1;
@@ -80,7 +80,7 @@
             // 
             // callAPI
             // 
-            callAPI.Location = new Point(1158, 67);
+            callAPI.Location = new Point(1158, 66);
             callAPI.Name = "callAPI";
             callAPI.Size = new Size(55, 34);
             callAPI.TabIndex = 4;
@@ -100,13 +100,13 @@
             // 
             // statusStrip
             // 
+            statusStrip.BackColor = Color.White;
             statusStrip.Items.AddRange(new ToolStripItem[] { systemStatus });
             statusStrip.Location = new Point(0, 717);
             statusStrip.Name = "statusStrip";
             statusStrip.Size = new Size(1257, 33);
             statusStrip.TabIndex = 8;
             statusStrip.Text = "System Status";
-            statusStrip.BackColor = Color.White;
             // 
             // systemStatus
             // 
