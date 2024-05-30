@@ -25,13 +25,17 @@ public partial class Dashboard : Form
         try
         {
             var httpVerb = httpVerbSelection.SelectedItem as string;
-            if (Enum.TryParse(httpVerb, out HttpAction action))
+            if (Enum.TryParse(httpVerb, out HttpAction action) == false)
             {
-                HttpContent content = new StringContent(bodyText.Text);
-                resultsText.Text = await api.CallApiAsync(apiText.Text, content, true, action);
-                callData.SelectedTab = resultsTab;
+                systemStatus.Text = "Invalid HTTP verb";
+                return;
             }
-            
+
+            resultsText.Text = await api.CallApiAsync(apiText.Text, bodyText.Text, action, true);
+
+            callData.SelectedTab = resultsTab;
+            resultsTab.Focus();
+
             systemStatus.Text = "Ready";
         }
         catch (Exception ex)

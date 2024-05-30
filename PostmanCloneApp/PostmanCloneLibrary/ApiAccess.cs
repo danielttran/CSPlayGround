@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 
 namespace PostmanCloneLibrary;
 
@@ -6,9 +7,10 @@ public class ApiAccess : IApiAccess
 {
     private readonly HttpClient client = new();
     public async Task<string> CallApiAsync(string url,
-                                           HttpContent content = null,
-                                           bool formatOutput = true,
-                                           HttpAction action = HttpAction.GET)
+                                           HttpContent? content,
+                                           HttpAction action = HttpAction.GET,
+                                           bool formatOutput = true
+        )
     {
         HttpResponseMessage responseMessage = action switch
         {
@@ -16,6 +18,8 @@ public class ApiAccess : IApiAccess
             HttpAction.POST => await client.PostAsync(url, content),
             HttpAction.PUT => await client.PutAsync(url, content),
             HttpAction.DELETE => await client.DeleteAsync(url),
+            HttpAction.PATCH => await client.PatchAsync(url, content),
+
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
         };
 
@@ -35,6 +39,12 @@ public class ApiAccess : IApiAccess
         {
             throw new HttpRequestException($"Error: {responseMessage.StatusCode}");
         }
+    }
+
+    public async Task<string> CallApiAsync(string url, string content, HttpAction action = HttpAction.GET, bool formatOutput = true)
+    {
+        StringContent stringContent = new(content, Encoding.UTF8, "application/json");
+        return await CallApiAsync(url, stringContent, action, formatOutput);
     }
 
     public bool IsValidUrl(string url)

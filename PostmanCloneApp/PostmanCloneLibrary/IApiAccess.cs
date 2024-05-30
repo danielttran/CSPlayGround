@@ -4,9 +4,18 @@ namespace PostmanCloneLibrary
     public interface IApiAccess
     {
         Task<string> CallApiAsync(string url,
-                                  HttpContent content = null,
-                                  bool formatOutput = true,
-                                  HttpAction action = HttpAction.GET);
+                                  HttpContent? content,
+                                  HttpAction action = HttpAction.GET,
+                                  bool formatOutput = true
+            );
+
+        Task<string> CallApiAsync(string url,
+                                  string content,
+                                  HttpAction action = HttpAction.GET,
+                                  bool formatOutput = true
+            );
+
+
         bool IsValidUrl(string url);
     }
 }

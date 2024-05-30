@@ -75,9 +75,9 @@
             // 
             // callAPI
             // 
-            callAPI.Location = new Point(1158, 66);
+            callAPI.Location = new Point(1158, 67);
             callAPI.Name = "callAPI";
-            callAPI.Size = new Size(55, 34);
+            callAPI.Size = new Size(55, 35);
             callAPI.TabIndex = 4;
             callAPI.Text = "Go";
             callAPI.UseVisualStyleBackColor = true;
@@ -145,10 +145,10 @@
             // resultsTab
             // 
             resultsTab.Controls.Add(resultsText);
-            resultsTab.Location = new Point(4, 34);
+            resultsTab.Location = new Point(4, 24);
             resultsTab.Name = "resultsTab";
             resultsTab.Padding = new Padding(3);
-            resultsTab.Size = new Size(1178, 560);
+            resultsTab.Size = new Size(1178, 570);
             resultsTab.TabIndex = 1;
             resultsTab.Text = "Results";
             resultsTab.UseVisualStyleBackColor = true;
@@ -163,7 +163,7 @@
             resultsText.Name = "resultsText";
             resultsText.ReadOnly = true;
             resultsText.ScrollBars = ScrollBars.Both;
-            resultsText.Size = new Size(1172, 554);
+            resultsText.Size = new Size(1172, 564);
             resultsText.TabIndex = 4;
             // 
             // Dashboard
